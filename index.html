@@ -240,17 +240,14 @@ const MUSIC_DB = [
   let activeMin = null;
   let activeMax = null;
 
-  function render() {
+function render() {
     const container = document.getElementById('results');
     container.innerHTML = '';
     const langQuery = sLang.value;
     const inputBpm = sBpm.value;
 
     const filtered = MUSIC_DB.filter(s => {
-      // ตรวจสอบภาษา
       const matchLang = langQuery !== 'all' ? (s.lang === langQuery) : true;
-      
-      // ตรวจสอบ BPM (ให้ความสำคัญกับปุ่มกดก่อน ถ้าไม่ได้กดปุ่มให้ดูที่ช่องพิมพ์)
       let matchBpm = true;
       if (activeMin !== null && activeMax !== null) {
         matchBpm = (s.bpm >= activeMin && s.bpm <= activeMax);
@@ -258,14 +255,10 @@ const MUSIC_DB = [
         const target = parseInt(inputBpm);
         matchBpm = (s.bpm >= target - 10 && s.bpm <= target + 10);
       }
-
       return matchBpm && matchLang;
     });
 
-    // เรียงความเร็วจากน้อยไปมาก
     filtered.sort((a, b) => a.bpm - b.bpm);
-
-    // แสดงจำนวนเพลงที่พบ
     resultCount.textContent = `พบเพลงที่ตรงเงื่อนไข ${filtered.length} เพลง`;
 
     if (filtered.length === 0) {
@@ -273,7 +266,9 @@ const MUSIC_DB = [
     }
 
     filtered.forEach(s => {
-      const ytLink = `https://music.youtube.com/search?q=${encodeURIComponent(s.title + ' ' + s.artist)}`;
+      // เพิ่ม &autoplay=1 เพื่อให้ YouTube พยายามเล่นอัตโนมัติ
+      const ytLink = `https://music.youtube.com/search?q=${encodeURIComponent(s.title + ' ' + s.artist)}&autoplay=1`;
+      
       container.innerHTML += `
         <div class="song-row">
           <div class="bpm-badge">${s.bpm} BPM</div>
@@ -281,7 +276,7 @@ const MUSIC_DB = [
             <span class="song-title">${s.title}<span class="lang-tag">${s.lang}</span></span>
             <span class="song-artist">${s.artist}</span>
           </div>
-          <a href="${ytLink}" target="_blank" class="yt-link">ฟังใน YT Music</a>
+          <a href="${ytLink}" target="_blank" class="yt-link">เล่นเลย</a>
         </div>
       `;
     });
