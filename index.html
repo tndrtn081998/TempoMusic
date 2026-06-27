@@ -13,11 +13,12 @@
   :root { --primary: #2563eb; --bg: #f8fafc; --card: #ffffff; --text: #1e293b; --text-light: #64748b; --border: #e2e8f0; }
   body { background-color: var(--bg); color: var(--text); font-family: 'Plus Jakarta Sans', sans-serif; padding: 40px 20px; margin: 0; }
   .app { max-width: 600px; margin: 0 auto; }
-  h1 { font-size: 1.75rem; color: var(--primary); margin-bottom: 24px; text-align: center; font-weight: 600; }
+  h1 { font-size: 1.75rem; color: var(--primary); margin-bottom: 8px; text-align: center; font-weight: 600; }
+  #songCount { text-align: center; color: var(--text-light); font-size: 0.85rem; margin-bottom: 20px; font-weight: 600; }
   .controls { display: flex; gap: 12px; margin-bottom: 24px; }
   input, select { padding: 12px 16px; border-radius: 12px; border: 1px solid var(--border); background: var(--card); flex: 1; outline: none; }
   .chips { display: flex; flex-wrap: wrap; gap: 8px; margin-bottom: 24px; justify-content: center; }
-  .chip { padding: 8px 16px; border-radius: 20px; border: 1px solid var(--border); background: white; color: var(--text-light); font-size: 0.85rem; cursor: pointer; }
+  .chip { padding: 8px 16px; border-radius: 20px; border: 1px solid var(--border); background: white; color: var(--text-light); font-size: 0.85rem; cursor: pointer; transition: 0.2s; }
   .chip.active { background: var(--primary); color: white; border-color: var(--primary); }
   .song-row { background: var(--card); padding: 16px; border-radius: 16px; border: 1px solid var(--border); display: flex; align-items: center; margin-bottom: 12px; box-shadow: 0 1px 3px rgba(0,0,0,0.05); }
   .bpm-badge { background: #eff6ff; color: var(--primary); font-weight: 600; padding: 4px 10px; border-radius: 8px; font-size: 0.8rem; margin-right: 16px; }
@@ -32,6 +33,8 @@
 
 <div class="app">
   <h1>TempoDeck</h1>
+  <div id="songCount">กำลังโหลดข้อมูล...</div>
+  
   <div class="controls">
     <input type="number" id="sBpm" placeholder="ระบุ BPM...">
     <select id="sLang">
@@ -42,25 +45,26 @@
       <option value="เกาหลี">เกาหลี</option>
     </select>
   </div>
-    <div class="chips">
+  
+  <div class="chips">
     <button class="chip btn-filter" data-min="60" data-max="90">ผ่อนคลาย (60–90)</button>
     <button class="chip btn-filter" data-min="90" data-max="110">เดิน (90–110)</button>
     <button class="chip btn-filter" data-min="110" data-max="130">เต้น (110–130)</button>
     <button class="chip btn-filter" data-min="130" data-max="160">วิ่ง (130–160)</button>
     <button class="chip btn-filter" data-min="160" data-max="190">HIIT (160–190)</button>
-    
-    <!-- ปุ่มล้าง -->
     <button class="chip" id="clearFilter" style="background:#f1f5f9; border:none;">ล้าง</button>
-    
-    <!-- ปุ่มสุ่มสีแดงเด่น -->
     <button class="chip" onclick="randomSong()" style="background:#e11d48; color:white; border:none; font-weight:600;">🎲 สุ่มเพลง</button>
-    </div>
+  </div>
+  
   <div id="results"></div>
 </div>
 
 <script>
 const MUSIC_DB = [
     // ผ่อนคลาย / บัลลาด (60–90 BPM)
+    { title:'Loser', artist:'BIGBANG', bpm:89, lang:'เกาหลี' },
+    { title:'Haru Haru', artist:'BIGBANG', bpm:85, lang:'เกาหลี' },
+    { title:'Love Scenario', artist:'iKON', bpm:89, lang:'เกาหลี' },
     { title:'Someone Like You', artist:'Adele', bpm:67, lang:'สากล' },
     { title:'Fix You', artist:'Coldplay', bpm:68, lang:'สากล' },
     { title:'Through the Night', artist:'IU', bpm:70, lang:'เกาหลี' },
@@ -111,6 +115,9 @@ const MUSIC_DB = [
     { title:'Perfect', artist:'Ed Sheeran', bpm:63, lang:'สากล' },
 
     // เดิน / ป็อปทั่วไป (90–110 BPM)
+    { title:'BBIBBI', artist:'IU', bpm:98, lang:'เกาหลี' },
+    { title:'Playing with Fire', artist:'BLACKPINK', bpm:104, lang:'เกาหลี' },
+    { title:'Bad Boy', artist:'Red Velvet', bpm:110, lang:'เกาหลี' },
     { title:'Photograph', artist:'Ed Sheeran', bpm:90, lang:'สากล' },
     { title:'Pink Venom', artist:'BLACKPINK', bpm:90, lang:'เกาหลี' },
     { title:'คนไกล', artist:'Patrickananda', bpm:90, lang:'ไทย' },
@@ -148,6 +155,24 @@ const MUSIC_DB = [
     { title:'คนไม่คุย', artist:'PROXIE', bpm:110, lang:'ไทย' },
 
     // เต้น / EDM (110–130 BPM)
+    { title:'Mirotic', artist:'TVXQ', bpm:115, lang:'เกาหลี' },
+    { title:'Growl', artist:'EXO', bpm:115, lang:'เกาหลี' },
+    { title:'Celebrity', artist:'IU', bpm:118, lang:'เกาหลี' },
+    { title:'Fire', artist:'2NE1', bpm:124, lang:'เกาหลี' },
+    { title:'As If It\'s Your Last', artist:'BLACKPINK', bpm:125, lang:'เกาหลี' },
+    { title:'Very Nice', artist:'SEVENTEEN', bpm:125, lang:'เกาหลี' },
+    { title:'Gentleman', artist:'PSY', bpm:126, lang:'เกาหลี' },
+    { title:'Fantastic Baby', artist:'BIGBANG', bpm:128, lang:'เกาหลี' },
+    { title:'Sorry Sorry', artist:'Super Junior', bpm:128, lang:'เกาหลี' },
+    { title:'Ring Ding Dong', artist:'SHINee', bpm:128, lang:'เกาหลี' },
+    { title:'I Am The Best', artist:'2NE1', bpm:128, lang:'เกาหลี' },
+    { title:'Cheer Up', artist:'TWICE', bpm:128, lang:'เกาหลี' },
+    { title:'Daddy', artist:'PSY', bpm:129, lang:'เกาหลี' },
+    { title:'Good Day', artist:'IU', bpm:130, lang:'เกาหลี' },
+    { title:'Gee', artist:'SNSD', bpm:130, lang:'เกาหลี' },
+    { title:'Heartbeat', artist:'2PM', bpm:130, lang:'เกาหลี' },
+    { title:'TT', artist:'TWICE', bpm:130, lang:'เกาหลี' },
+    { title:'Russian Roulette', artist:'Red Velvet', bpm:130, lang:'เกาหลี' },
     { title:'วัดปะหล่ะ?', artist:'4EVE', bpm:112, lang:'ไทย' },
     { title:'Kirari', artist:'Fujii Kaze', bpm:112, lang:'ญี่ปุ่น' },
     { title:'Can\'t Stop the Feeling!', artist:'Justin Timberlake', bpm:113, lang:'สากล' },
@@ -208,6 +233,12 @@ const MUSIC_DB = [
     { title:'แฟนคลับ', artist:'Clash', bpm:130, lang:'ไทย' },
 
     // วิ่งเหยาะ / คาร์ดิโอ (130–160 BPM)
+    { title:'Kill This Love', artist:'BLACKPINK', bpm:131, lang:'เกาหลี' },
+    { title:'Gangnam Style', artist:'PSY', bpm:132, lang:'เกาหลี' },
+    { title:'Fancy', artist:'TWICE', bpm:135, lang:'เกาหลี' },
+    { title:'BANG BANG BANG', artist:'BIGBANG', bpm:138, lang:'เกาหลี' },
+    { title:'DDU-DU DDU-DU', artist:'BLACKPINK', bpm:140, lang:'เกาหลี' },
+    { title:'Solo', artist:'JENNIE', bpm:140, lang:'เกาหลี' },
     { title:'Ditto', artist:'NewJeans', bpm:134, lang:'เกาหลี' },
     { title:'In the Name of Love', artist:'Martin Garrix', bpm:134, lang:'สากล' },
     { title:'Bad Guy', artist:'Billie Eilish', bpm:135, lang:'สากล' },
@@ -244,111 +275,78 @@ const MUSIC_DB = [
     { title:'As It Was', artist:'Harry Styles', bpm:174, lang:'สากล' },
     { title:'Uso', artist:'SID', bpm:175, lang:'ญี่ปุ่น' },
     { title:'THE DAY', artist:'Porno Graffitti', bpm:180, lang:'ญี่ปุ่น' },
-    { title:'Rising Hope', artist:'LiSA', bpm:185, lang:'ญี่ปุ่น' },
-
-    // เพลงเกาหลีเพิ่ม (30 เพลงฮิต)
-    { title:'BANG BANG BANG', artist:'BIGBANG', bpm:138, lang:'เกาหลี' },
-    { title:'Fantastic Baby', artist:'BIGBANG', bpm:128, lang:'เกาหลี' },
-    { title:'Loser', artist:'BIGBANG', bpm:89, lang:'เกาหลี' },
-    { title:'Haru Haru', artist:'BIGBANG', bpm:85, lang:'เกาหลี' },
-    { title:'Gangnam Style', artist:'PSY', bpm:132, lang:'เกาหลี' },
-    { title:'Gentleman', artist:'PSY', bpm:126, lang:'เกาหลี' },
-    { title:'Daddy', artist:'PSY', bpm:129, lang:'เกาหลี' },
-    { title:'Celebrity', artist:'IU', bpm:118, lang:'เกาหลี' },
-    { title:'BBIBBI', artist:'IU', bpm:98, lang:'เกาหลี' },
-    { title:'Good Day', artist:'IU', bpm:130, lang:'เกาหลี' },
-    { title:'DDU-DU DDU-DU', artist:'BLACKPINK', bpm:140, lang:'เกาหลี' },
-    { title:'Kill This Love', artist:'BLACKPINK', bpm:131, lang:'เกาหลี' },
-    { title:'As If It\'s Your Last', artist:'BLACKPINK', bpm:125, lang:'เกาหลี' },
-    { title:'Playing with Fire', artist:'BLACKPINK', bpm:104, lang:'เกาหลี' },
-    { title:'Solo', artist:'JENNIE', bpm:140, lang:'เกาหลี' },
-    { title:'Love Scenario', artist:'iKON', bpm:89, lang:'เกาหลี' },
-    { title:'Growl', artist:'EXO', bpm:115, lang:'เกาหลี' },
-    { title:'Gee', artist:'SNSD', bpm:130, lang:'เกาหลี' },
-    { title:'Sorry Sorry', artist:'Super Junior', bpm:128, lang:'เกาหลี' },
-    { title:'Ring Ding Dong', artist:'SHINee', bpm:128, lang:'เกาหลี' },
-    { title:'Mirotic', artist:'TVXQ', bpm:115, lang:'เกาหลี' },
-    { title:'I Am The Best', artist:'2NE1', bpm:128, lang:'เกาหลี' },
-    { title:'Fire', artist:'2NE1', bpm:124, lang:'เกาหลี' },
-    { title:'Heartbeat', artist:'2PM', bpm:130, lang:'เกาหลี' },
-    { title:'Very Nice', artist:'SEVENTEEN', bpm:125, lang:'เกาหลี' },
-    { title:'TT', artist:'TWICE', bpm:130, lang:'เกาหลี' },
-    { title:'Cheer Up', artist:'TWICE', bpm:128, lang:'เกาหลี' },
-    { title:'Fancy', artist:'TWICE', bpm:135, lang:'เกาหลี' },
-    { title:'Russian Roulette', artist:'Red Velvet', bpm:130, lang:'เกาหลี' },
-    { title:'Bad Boy', artist:'Red Velvet', bpm:110, lang:'เกาหลี' }
+    { title:'Rising Hope', artist:'LiSA', bpm:185, lang:'ญี่ปุ่น' }
 ];
-  let activeMin = null, activeMax = null;
 
-  function randomSong() {
-    const langValue = document.getElementById('sLang').value;
-    const inputBpm = document.getElementById('sBpm').value;
-    const filtered = MUSIC_DB.filter(s => {
-      const matchLang = langValue !== 'all' ? (s.lang === langValue) : true;
-      let matchBpm = true;
-      if (activeMin !== null && activeMax !== null) matchBpm = (s.bpm >= activeMin && s.bpm <= activeMax);
-      else if (inputBpm) matchBpm = (s.bpm >= parseInt(inputBpm) - 10 && s.bpm <= parseInt(inputBpm) + 10);
-      return matchBpm && matchLang;
-    });
+let activeMin = null, activeMax = null;
 
-    if (filtered.length > 0) render(filtered[Math.floor(Math.random() * filtered.length)]);
-    else alert("ไม่พบเพลงที่ตรงเงื่อนไข!");
-  }
-
-  function render(highlightSong = null) {
+function render(highlightSong = null) {
     const container = document.getElementById('results');
+    const countDisplay = document.getElementById('songCount');
     container.innerHTML = '';
+    
     const langQuery = document.getElementById('sLang').value;
     const inputBpm = document.getElementById('sBpm').value;
 
+    const filtered = MUSIC_DB.filter(s => {
+        const matchLang = langQuery !== 'all' ? (s.lang === langQuery) : true;
+        let matchBpm = (activeMin !== null) 
+            ? (s.bpm >= activeMin && s.bpm <= activeMax) 
+            : (inputBpm ? (s.bpm >= parseInt(inputBpm)-10 && s.bpm <= parseInt(inputBpm)+10) : true);
+        return matchBpm && matchLang;
+    });
+
+    countDisplay.innerText = `พบ ${filtered.length} เพลง จากทั้งหมด ${MUSIC_DB.length} เพลง`;
+
     if (highlightSong) {
-      container.innerHTML += `<div style="background:#eff6ff; border:2px solid var(--primary); padding:16px; border-radius:16px; margin-bottom:20px;">
-        <div style="color:var(--primary); font-weight:600; margin-bottom:10px;">🎲 สุ่มมาให้แล้ว:</div>
-        <div class="song-row" style="margin-bottom:0;">
-          <div class="bpm-badge">${highlightSong.bpm} BPM</div>
-          <div class="song-info"><span class="song-title">${highlightSong.title}</span><span class="song-artist">${highlightSong.artist}</span></div>
-          <a href="https://music.youtube.com/search?q=${encodeURIComponent(highlightSong.title)}" target="_blank" class="yt-link">เล่นเลย</a>
-        </div></div>`;
+        container.innerHTML += `<div style="background:#eff6ff; border:2px solid var(--primary); padding:16px; border-radius:16px; margin-bottom:20px;">
+            <div style="color:var(--primary); font-weight:600; margin-bottom:10px;">🎲 สุ่มมาให้แล้ว:</div>
+            <div class="song-row" style="margin-bottom:0;">
+                <div class="bpm-badge">${highlightSong.bpm} BPM</div>
+                <div class="song-info"><span class="song-title">${highlightSong.title}</span><span class="song-artist">${highlightSong.artist}</span></div>
+                <a href="https://music.youtube.com/search?q=${encodeURIComponent(highlightSong.title + ' ' + highlightSong.artist)}" target="_blank" class="yt-link">เล่นเลย</a>
+            </div></div>`;
     }
 
-    MUSIC_DB.filter(s => {
-      const matchLang = langQuery !== 'all' ? (s.lang === langQuery) : true;
-      let matchBpm = (activeMin !== null) ? (s.bpm >= activeMin && s.bpm <= activeMax) : (inputBpm ? (s.bpm >= parseInt(inputBpm)-10 && s.bpm <= parseInt(inputBpm)+10) : true);
-      return matchBpm && matchLang;
-    }).forEach(s => {
-      container.innerHTML += `<div class="song-row">
-        <div class="bpm-badge">${s.bpm} BPM</div>
-        <div class="song-info"><span class="song-title">${s.title}<span class="lang-tag">${s.lang}</span></span><span class="song-artist">${s.artist}</span></div>
-        <a href="https://music.youtube.com/search?q=${encodeURIComponent(s.title + ' ' + s.artist)}" target="_blank" class="yt-link">เล่นเลย</a>
-      </div>`;
+    filtered.forEach(s => {
+        container.innerHTML += `<div class="song-row">
+            <div class="bpm-badge">${s.bpm} BPM</div>
+            <div class="song-info"><span class="song-title">${s.title}<span class="lang-tag">${s.lang}</span></span><span class="song-artist">${s.artist}</span></div>
+            <a href="https://music.youtube.com/search?q=${encodeURIComponent(s.title + ' ' + s.artist)}" target="_blank" class="yt-link">เล่นเลย</a>
+        </div>`;
     });
-  }
+}
 
-  document.getElementById('sBpm').addEventListener('input', () => { activeMin = null; render(); });
-  document.getElementById('sLang').addEventListener('change', () => render());
-  document.querySelectorAll('.btn-filter').forEach(btn => btn.addEventListener('click', (e) => {
+function randomSong() {
+    const langValue = document.getElementById('sLang').value;
+    const inputBpm = document.getElementById('sBpm').value;
+    const filtered = MUSIC_DB.filter(s => {
+        const matchLang = langValue !== 'all' ? (s.lang === langValue) : true;
+        let matchBpm = (activeMin !== null) ? (s.bpm >= activeMin && s.bpm <= activeMax) : (inputBpm ? (s.bpm >= parseInt(inputBpm) - 10 && s.bpm <= parseInt(inputBpm) + 10) : true);
+        return matchBpm && matchLang;
+    });
+    if (filtered.length > 0) render(filtered[Math.floor(Math.random() * filtered.length)]);
+    else alert("ไม่พบเพลงที่ตรงเงื่อนไข!");
+}
+
+document.getElementById('clearFilter').addEventListener('click', () => {
+    document.querySelectorAll('.btn-filter').forEach(b => b.classList.remove('active'));
+    activeMin = null; activeMax = null;
+    document.getElementById('sBpm').value = '';
+    document.getElementById('sLang').value = 'all';
+    render();
+});
+
+document.getElementById('sBpm').addEventListener('input', () => { activeMin = null; document.querySelectorAll('.btn-filter').forEach(b => b.classList.remove('active')); render(); });
+document.getElementById('sLang').addEventListener('change', () => render());
+document.querySelectorAll('.btn-filter').forEach(btn => btn.addEventListener('click', (e) => {
     document.querySelectorAll('.btn-filter').forEach(b => b.classList.remove('active'));
     e.target.classList.add('active');
     activeMin = parseInt(e.target.dataset.min); activeMax = parseInt(e.target.dataset.max);
     render();
-  }));
-  // ปุ่มล้างตัวกรอง (แก้ไขให้ล้างสีน้ำเงินออกด้วย)
-document.getElementById('clearFilter').addEventListener('click', () => {
-    // 1. ลบ class 'active' ออกจากปุ่มหมวดหมู่ BPM ทุกปุ่ม
-    document.querySelectorAll('.btn-filter').forEach(b => b.classList.remove('active'));
-    
-    // 2. รีเซ็ตค่าตัวแปร
-    activeMin = null;
-    activeMax = null;
-    
-    // 3. เคลียร์ค่าในช่อง Input และ Select
-    document.getElementById('sBpm').value = '';
-    document.getElementById('sLang').value = 'all';
-    
-    // 4. แสดงผลรายการทั้งหมดใหม่
-    render();
-});
-  render();
+}));
+
+render();
 </script>
 </body>
 </html>
