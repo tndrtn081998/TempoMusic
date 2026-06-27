@@ -1,0 +1,348 @@
+<!DOCTYPE html>
+<html lang="th">
+<head>
+<meta name="apple-mobile-web-app-capable" content="yes">
+<meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
+<meta name="apple-mobile-web-app-title" content="TempoDeck">
+<link rel="apple-touch-icon" href="https://example.com/icon.png">
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>TempoDeck — Minimal BPM Finder</title>
+<style>
+  @import url('https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600&display=swap');
+
+  :root { 
+    --bg: #F9F9F9; 
+    --text: #1A1A1A; 
+    --accent: #007AFF; 
+    --border: #E5E5E5;
+  }
+  body { 
+    background: var(--bg); 
+    color: var(--text); 
+    font-family: 'Inter', sans-serif; 
+    padding: 40px 20px; 
+    line-height: 1.6; 
+  }
+  .app { max-width: 700px; margin: 0 auto; }
+  h1 { font-weight: 600; font-size: 1.5rem; margin-bottom: 20px; }
+  
+  .controls { display: flex; gap: 10px; margin-bottom: 15px; }
+  input, select { 
+    padding: 10px 15px; 
+    border-radius: 6px; 
+    border: 1px solid var(--border); 
+    background: white; 
+    font-family: inherit; 
+    flex: 1; 
+  }
+
+  /* สไตล์ของปุ่ม Filter ตามแบบในรูป */
+  .chips {
+    display: flex;
+    gap: 8px;
+    flex-wrap: wrap;
+    margin-bottom: 30px;
+  }
+  .chip {
+    padding: 8px 16px;
+    border-radius: 999px;
+    border: 1px solid var(--border);
+    background: transparent;
+    color: #555;
+    font-size: 0.85rem;
+    font-family: inherit;
+    cursor: pointer;
+    transition: all 0.2s ease;
+  }
+  .chip:hover {
+    border-color: var(--accent);
+    color: var(--accent);
+  }
+  .chip.active {
+    background: var(--accent);
+    color: white;
+    border-color: var(--accent);
+  }
+  
+  .song-row { 
+    display: flex; 
+    align-items: center; 
+    padding: 15px 0; 
+    border-bottom: 1px solid var(--border); 
+  }
+  .song-row:last-child { border-bottom: none; }
+  .bpm-badge { font-weight: 600; color: #666; width: 80px; font-size: 0.9rem; }
+  .song-info { flex: 1; }
+  .song-title { font-weight: 500; display: block; color: var(--text); }
+  .song-artist { font-size: 0.85rem; color: #888; }
+  .lang-tag { 
+    font-size: 0.7rem; 
+    color: #999; 
+    text-transform: uppercase; 
+    margin-left: 8px; 
+    border: 1px solid #EEE; 
+    padding: 2px 6px; 
+    border-radius: 4px; 
+  }
+  
+  .yt-link { 
+    font-size: 0.85rem; 
+    color: var(--accent); 
+    text-decoration: none; 
+    font-weight: 500; 
+    padding: 6px 12px;
+    background: rgba(0, 122, 255, 0.08);
+    border-radius: 6px;
+    transition: background 0.2s;
+  }
+  .yt-link:hover { background: rgba(0, 122, 255, 0.15); }
+  
+  .result-count { font-size: 0.85rem; color: #888; margin-bottom: 15px; font-weight: 500; }
+</style>
+</head>
+<body>
+
+<div class="app">
+  <h1>TempoDeck</h1>
+  
+  <div class="controls">
+    <input type="number" id="sBpm" placeholder="หรือระบุ BPM เอง (เช่น 120)">
+    <select id="sLang">
+      <option value="all">ทุกภาษา</option>
+      <option value="ไทย">ไทย</option>
+      <option value="สากล">สากล</option>
+      <option value="ญี่ปุ่น">ญี่ปุ่น</option>
+      <option value="เกาหลี">เกาหลี</option>
+    </select>
+  </div>
+
+  <!-- เพิ่มหมวดหมู่ Filter ที่นี่ -->
+  <div class="chips">
+    <button class="chip btn-filter" data-min="60" data-max="90">ผ่อนคลาย / บัลลาด (60–90)</button>
+    <button class="chip btn-filter" data-min="90" data-max="110">เดิน / ป็อปทั่วไป (90–110)</button>
+    <button class="chip btn-filter" data-min="110" data-max="130">เต้น / EDM (110–130)</button>
+    <button class="chip btn-filter" data-min="130" data-max="160">วิ่งเหยาะ / คาร์ดิโอ (130–160)</button>
+    <button class="chip btn-filter" data-min="160" data-max="190">วิ่งเร็ว / HIIT (160–190)</button>
+    <button class="chip" id="clearFilter">ล้างตัวกรอง</button>
+  </div>
+
+  <div class="result-count" id="resultCount"></div>
+  <div id="results"></div>
+</div>
+
+<script>
+  // ฐานข้อมูลเพลง 50 เพลง
+const MUSIC_DB = [
+  // ผ่อนคลาย / บัลลาด (60-90 BPM)
+  { title:'Stay With Me', artist:'Sam Smith', bpm:84, lang:'สากล' },
+  { title:'Someone Like You', artist:'Adele', bpm:67, lang:'สากล' },
+  { title:'Perfect', artist:'Ed Sheeran', bpm:63, lang:'สากล' },
+  { title:'Photograph', artist:'Ed Sheeran', bpm:90, lang:'สากล' },
+  { title:'ซ่อนกลิ่น', artist:'Palmy', bpm:85, lang:'ไทย' },
+  { title:'วาดไว้', artist:'BOWKYLION', bpm:75, lang:'ไทย' },
+  { title:'นะหน้าทอง', artist:'โจอี้ ภูวศิษฐ์', bpm:78, lang:'ไทย' },
+  { title:'ถ้าเธอรักฉันจริง', artist:'Three Man Down', bpm:74, lang:'ไทย' },
+  { title:'Dried Flower', artist:'Yuuri', bpm:78, lang:'ญี่ปุ่น' },
+  { title:'First Love', artist:'Hikaru Utada', bpm:75, lang:'ญี่ปุ่น' },
+  { title:'Pink Venom', artist:'BLACKPINK', bpm:90, lang:'เกาหลี' },
+  { title:'All of Me', artist:'John Legend', bpm:63, lang:'สากล' },
+  { title:'Thinking Out Loud', artist:'Ed Sheeran', bpm:79, lang:'สากล' },
+  { title:'Love Is An Open Door', artist:'Disney', bpm:80, lang:'สากล' },
+  { title:'แพ้ทาง', artist:'LABANOON', bpm:88, lang:'ไทย' },
+  { title:'โต๊ะริม', artist:'นนท์ ธนนท์', bpm:92, lang:'ไทย' },
+  { title:'Pretender', artist:'Official HIGE DANdism', bpm:92, lang:'ญี่ปุ่น' },
+  { title:'Fix You', artist:'Coldplay', bpm:68, lang:'สากล' },
+  { title:'Yellow', artist:'Coldplay', bpm:87, lang:'สากล' },
+  { title:'The Scientist', artist:'Coldplay', bpm:73, lang:'สากล' },
+
+  // เดิน / ป็อปทั่วไป (90-110 BPM)
+  { title:'Levitating', artist:'Dua Lipa', bpm:103, lang:'สากล' },
+  { title:'คิด(แต่ไม่)ถึง', artist:'Tilly Birds', bpm:100, lang:'ไทย' },
+  { title:'Shinunoga E-Wa', artist:'Fujii Kaze', bpm:100, lang:'ญี่ปุ่น' },
+  { title:'Hype Boy', artist:'NewJeans', bpm:100, lang:'เกาหลี' },
+  { title:'Attention', artist:'NewJeans', bpm:105, lang:'เกาหลี' },
+  { title:'Fire Boy', artist:'PP Krit', bpm:105, lang:'ไทย' },
+  { title:'Eleven', artist:'IVE', bpm:100, lang:'เกาหลี' },
+  { title:'Fan Favorite', artist:'SLAPKISS', bpm:108, lang:'ไทย' },
+  { title:'Blue Bird', artist:'Ikimonogakari', bpm:110, lang:'ญี่ปุ่น' },
+  { title:'Shut Down', artist:'BLACKPINK', bpm:110, lang:'เกาหลี' },
+  { title:'Butter', artist:'BTS', bpm:110, lang:'เกาหลี' },
+  { title:'Love Me Like You Do', artist:'Ellie Goulding', bpm:95, lang:'สากล' },
+  { title:'Sugar', artist:'Maroon 5', bpm:120, lang:'สากล' },
+  { title:'Happy', artist:'Pharrell Williams', bpm:160, lang:'สากล' },
+  { title:'Dynamite', artist:'BTS', bpm:114, lang:'เกาหลี' },
+  { title:'Can\'t Stop the Feeling!', artist:'Justin Timberlake', bpm:113, lang:'สากล' },
+  { title:'วัดปะหล่ะ?', artist:'4EVE', bpm:112, lang:'ไทย' },
+  { title:'Kirari', artist:'Fujii Kaze', bpm:112, lang:'ญี่ปุ่น' },
+  { title:'Watermelon Sugar', artist:'Harry Styles', bpm:95, lang:'สากล' },
+  { title:'Counting Stars', artist:'OneRepublic', bpm:122, lang:'สากล' },
+
+  // เต้น / EDM (110-130 BPM)
+  { title:'Uptown Funk', artist:'Mark Ronson', bpm:115, lang:'สากล' },
+  { title:'Flowers', artist:'Miley Cyrus', bpm:118, lang:'สากล' },
+  { title:'Love Dive', artist:'IVE', bpm:119, lang:'เกาหลี' },
+  { title:'ค้างคา', artist:'LOMOSONIC', bpm:128, lang:'ไทย' },
+  { title:'OMG', artist:'NewJeans', bpm:127, lang:'เกาหลี' },
+  { title:'Don\'t Start Now', artist:'Dua Lipa', bpm:124, lang:'สากล' },
+  { title:'Kaikai Kitan', artist:'Eve', bpm:130, lang:'ญี่ปุ่น' },
+  { title:'Kick Back', artist:'Kenshi Yonezu', bpm:130, lang:'ญี่ปุ่น' },
+  { title:'How You Like That', artist:'BLACKPINK', bpm:130, lang:'เกาหลี' },
+  { title:'Talk', artist:'Khalid', bpm:124, lang:'สากล' },
+  { title:'One More Night', artist:'Maroon 5', bpm:110, lang:'สากล' },
+  { title:'Moves Like Jagger', artist:'Maroon 5', bpm:128, lang:'สากล' },
+  { title:'Shape of You', artist:'Ed Sheeran', bpm:96, lang:'สากล' },
+  { title:'Cheap Thrills', artist:'Sia', bpm:90, lang:'สากล' },
+  { title:'Titanium', artist:'David Guetta', bpm:126, lang:'สากล' },
+  { title:'Clarity', artist:'Zedd', bpm:128, lang:'สากล' },
+  { title:'Stay', artist:'Zedd', bpm:102, lang:'สากล' },
+  { title:'Scared to be Lonely', artist:'Martin Garrix', bpm:138, lang:'สากล' },
+  { title:'In the Name of Love', artist:'Martin Garrix', bpm:134, lang:'สากล' },
+  { title:'Animals', artist:'Martin Garrix', bpm:128, lang:'สากล' },
+
+  // วิ่งเหยาะ / คาร์ดิโอ (130-160 BPM)
+  { title:'Bad Guy', artist:'Billie Eilish', bpm:135, lang:'สากล' },
+  { title:'เสก', artist:'LOMOSONIC', bpm:135, lang:'ไทย' },
+  { title:'Gurenge', artist:'LiSA', bpm:135, lang:'ญี่ปุ่น' },
+  { title:'Ditto', artist:'NewJeans', bpm:134, lang:'เกาหลี' },
+  { title:'Viva La Vida', artist:'Coldplay', bpm:138, lang:'สากล' },
+  { title:'ทรงอย่างแบด', artist:'Paper Planes', bpm:145, lang:'ไทย' },
+  { title:'Shake It Off', artist:'Taylor Swift', bpm:160, lang:'สากล' },
+  { title:'Stronger', artist:'Kelly Clarkson', bpm:116, lang:'สากล' },
+  { title:'Bang Bang', artist:'Jessie J', bpm:150, lang:'สากล' },
+  { title:'Can\'t Hold Us', artist:'Macklemore', bpm:146, lang:'สากล' },
+  { title:'Timber', artist:'Pitbull', bpm:130, lang:'สากล' },
+  { title:'Wake Me Up', artist:'Avicii', bpm:124, lang:'สากล' },
+  { title:'Levels', artist:'Avicii', bpm:126, lang:'สากล' },
+  { title:'Waiting For Love', artist:'Avicii', bpm:128, lang:'สากล' },
+  { title:'Hey Brother', artist:'Avicii', bpm:125, lang:'สากล' },
+  { title:'The Nights', artist:'Avicii', bpm:126, lang:'สากล' },
+  { title:'Cooler Than Me', artist:'Mike Posner', bpm:129, lang:'สากล' },
+  { title:'Feel So Close', artist:'Calvin Harris', bpm:128, lang:'สากล' },
+  { title:'Summer', artist:'Calvin Harris', bpm:128, lang:'สากล' },
+  { title:'This Is What You Came For', artist:'Calvin Harris', bpm:124, lang:'สากล' },
+
+  // วิ่งเร็ว / HIIT (160-190 BPM)
+  { title:'Blinding Lights', artist:'The Weeknd', bpm:171, lang:'สากล' },
+  { title:'As It Was', artist:'Harry Styles', bpm:174, lang:'สากล' },
+  { title:'Stay', artist:'The Kid LAROI', bpm:170, lang:'สากล' },
+  { title:'Idol', artist:'YOASOBI', bpm:166, lang:'ญี่ปุ่น' },
+  { title:'Monster', artist:'YOASOBI', bpm:170, lang:'ญี่ปุ่น' },
+  { title:'Good 4 u', artist:'Olivia Rodrigo', bpm:167, lang:'สากล' },
+  { title:'Cruel Summer', artist:'Taylor Swift', bpm:170, lang:'สากล' },
+  { title:'Party Rock Anthem', artist:'LMFAO', bpm:130, lang:'สากล' },
+  { title:'Don\'t Stop Me Now', artist:'Queen', bpm:156, lang:'สากล' },
+  { title:'Shut Up and Dance', artist:'Walk The Moon', bpm:128, lang:'สากล' },
+  { title:'Mr. Brightside', artist:'The Killers', bpm:148, lang:'สากล' },
+  { title:'Centuries', artist:'Fall Out Boy', bpm:167, lang:'สากล' },
+  { title:'Immortals', artist:'Fall Out Boy', bpm:153, lang:'สากล' },
+  { title:'Light It Up', artist:'Major Lazer', bpm:108, lang:'สากล' },
+  { title:'Burn', artist:'Ellie Goulding', bpm:87, lang:'สากล' },
+  { title:'Symphony', artist:'Clean Bandit', bpm:123, lang:'สากล' },
+  { title:'Rather Be', artist:'Clean Bandit', bpm:121, lang:'สากล' },
+  { title:'Rockabye', artist:'Clean Bandit', bpm:102, lang:'สากล' },
+  { title:'Mama', artist:'Clean Bandit', bpm:124, lang:'สากล' },
+  { title:'Solo', artist:'Clean Bandit', bpm:105, lang:'สากล' }
+];
+
+  const sBpm = document.getElementById('sBpm');
+  const sLang = document.getElementById('sLang');
+  const btnFilters = document.querySelectorAll('.btn-filter');
+  const btnClear = document.getElementById('clearFilter');
+  const resultCount = document.getElementById('resultCount');
+
+  // ตัวแปรเก็บค่า Range ปัจจุบัน
+  let activeMin = null;
+  let activeMax = null;
+
+  function render() {
+    const container = document.getElementById('results');
+    container.innerHTML = '';
+    const langQuery = sLang.value;
+    const inputBpm = sBpm.value;
+
+    const filtered = MUSIC_DB.filter(s => {
+      // ตรวจสอบภาษา
+      const matchLang = langQuery !== 'all' ? (s.lang === langQuery) : true;
+      
+      // ตรวจสอบ BPM (ให้ความสำคัญกับปุ่มกดก่อน ถ้าไม่ได้กดปุ่มให้ดูที่ช่องพิมพ์)
+      let matchBpm = true;
+      if (activeMin !== null && activeMax !== null) {
+        matchBpm = (s.bpm >= activeMin && s.bpm <= activeMax);
+      } else if (inputBpm) {
+        const target = parseInt(inputBpm);
+        matchBpm = (s.bpm >= target - 10 && s.bpm <= target + 10);
+      }
+
+      return matchBpm && matchLang;
+    });
+
+    // เรียงความเร็วจากน้อยไปมาก
+    filtered.sort((a, b) => a.bpm - b.bpm);
+
+    // แสดงจำนวนเพลงที่พบ
+    resultCount.textContent = `พบเพลงที่ตรงเงื่อนไข ${filtered.length} เพลง`;
+
+    if (filtered.length === 0) {
+      container.innerHTML = '<div style="text-align:center; color:#999; padding:20px;">ไม่พบเพลงที่ตรงกับเงื่อนไข</div>';
+    }
+
+    filtered.forEach(s => {
+      const ytLink = `https://music.youtube.com/search?q=${encodeURIComponent(s.title + ' ' + s.artist)}`;
+      container.innerHTML += `
+        <div class="song-row">
+          <div class="bpm-badge">${s.bpm} BPM</div>
+          <div class="song-info">
+            <span class="song-title">${s.title}<span class="lang-tag">${s.lang}</span></span>
+            <span class="song-artist">${s.artist}</span>
+          </div>
+          <a href="${ytLink}" target="_blank" class="yt-link">ฟังใน YT Music</a>
+        </div>
+      `;
+    });
+  }
+
+  // เมื่อพิมพ์ตัวเลขเอง ให้ยกเลิกการเลือกปุ่มหมวดหมู่
+  sBpm.addEventListener('input', () => {
+    activeMin = null;
+    activeMax = null;
+    btnFilters.forEach(btn => btn.classList.remove('active'));
+    render();
+  });
+
+  // เมื่อเปลี่ยนภาษา
+  sLang.addEventListener('change', render);
+
+  // เมื่อคลิกปุ่มหมวดหมู่ BPM
+  btnFilters.forEach(btn => {
+    btn.addEventListener('click', () => {
+      // รีเซ็ตปุ่มอื่น และเซ็ตปุ่มที่โดนคลิกให้ทำงาน
+      btnFilters.forEach(b => b.classList.remove('active'));
+      btn.classList.add('active');
+      
+      // ล้างช่องตัวเลข เพื่อป้องกันความสับสน
+      sBpm.value = '';
+      
+      // ดึงค่า min-max จากปุ่ม
+      activeMin = parseInt(btn.getAttribute('data-min'));
+      activeMax = parseInt(btn.getAttribute('data-max'));
+      
+      render();
+    });
+  });
+
+  // ปุ่มล้างตัวกรอง
+  btnClear.addEventListener('click', () => {
+    btnFilters.forEach(b => b.classList.remove('active'));
+    activeMin = null;
+    activeMax = null;
+    sBpm.value = '';
+    sLang.value = 'all';
+    render();
+  });
+
+  // โหลดหน้าแรก
+  render();
+</script>
+</body>
+</html>
