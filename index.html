@@ -536,7 +536,7 @@ function rowHTML(s) {
   // และยอมให้เล่นเสียง/วิดีโอได้บ่อยกว่าการใช้ลิงก์ <a> ปกติครับ
   const url = s.url ? s.url : 'https://music.youtube.com/search?q=' + encodeURIComponent(s.title+' '+s.artist) + '&autoplay=1';
   
-  return `<div onclick="window.open('${url}', '_blank')" class="song-row" style="cursor:pointer;">
+  return `<div onclick="window.location.href='${url}'" class="song-row" style="cursor:pointer;">
     <div class="bpm-badge" style="background:${bg}">
       <span class="bpm-num" style="color:${color}">${s.bpm}</span>
       <span class="bpm-label" style="color:${color}">BPM</span>
