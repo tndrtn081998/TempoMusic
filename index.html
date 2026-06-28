@@ -44,11 +44,13 @@
     pointer-events: none;
     z-index: 0;
   }
+
   body::before {
     top: -20%; left: 50%; transform: translateX(-50%);
     width: 600px; height: 600px;
     background: radial-gradient(circle, rgba(0,212,255,0.08) 0%, transparent 70%);
   }
+
   body::after {
     bottom: 10%; right: -10%;
     width: 400px; height: 400px;
@@ -65,11 +67,13 @@
     background: linear-gradient(135deg, var(--cyan), var(--purple));
     display: flex; align-items: center; justify-content: center; font-size: 1rem;
   }
+
   .logo-text {
     font-size: 1.75rem; font-weight: 800; letter-spacing: -0.03em;
     background: linear-gradient(90deg, var(--cyan), var(--purple));
     -webkit-background-clip: text; -webkit-text-fill-color: transparent; background-clip: text;
   }
+
   .song-count { font-family: 'DM Mono', monospace; font-size: 0.72rem; color: var(--muted); }
   .song-count span { color: var(--cyan); font-weight: 600; }
 
@@ -81,6 +85,7 @@
     color: var(--text); font-family: 'DM Mono', monospace; font-size: 0.9rem;
     outline: none; transition: border-color 0.2s;
   }
+
   .bpm-input:focus { border-color: rgba(0,212,255,0.5); }
   .bpm-input::placeholder { color: var(--muted); }
   .lang-select {
@@ -95,12 +100,14 @@
     font-family: 'DM Mono', monospace; font-size: 0.65rem;
     color: var(--muted); letter-spacing: 0.1em; text-transform: uppercase; margin-bottom: 10px;
   }
+
   .zone-grid { display: grid; grid-template-columns: repeat(5, 1fr); gap: 8px; margin-bottom: 14px; }
   .zone-chip {
     padding: 10px 4px; border-radius: 12px;
     border: 1px solid rgba(255,255,255,0.08); background: var(--card);
     cursor: pointer; text-align: center; transition: all 0.2s;
   }
+
   .zone-chip:hover { border-color: rgba(255,255,255,0.2); }
   .zone-chip.active { box-shadow: 0 0 20px var(--zone-glow); }
   .zone-emoji { font-size: 1.1rem; margin-bottom: 2px; }
@@ -116,6 +123,7 @@
     display: flex; align-items: center; justify-content: center; gap: 6px;
     transition: all 0.2s; border: 1px solid transparent;
   }
+
   #clearBtn { background: var(--surface); border-color: rgba(255,255,255,0.08); color: var(--muted); }
   #clearBtn:hover { border-color: rgba(255,255,255,0.2); color: var(--text); }
   #randomBtn { background: rgba(255,45,120,0.12); border-color: rgba(255,45,120,0.3); color: var(--pink); }
@@ -130,6 +138,7 @@
     background: rgba(255,45,120,0.08); border: 1px solid rgba(255,45,120,0.3);
     box-shadow: 0 0 24px rgba(255,45,120,0.15); animation: fadeSlide 0.25s ease;
   }
+
   @keyframes fadeSlide {
     from { opacity: 0; transform: translateY(-8px) scale(0.97); }
     to   { opacity: 1; transform: translateY(0) scale(1); }
@@ -224,237 +233,271 @@
     <button class="action-btn" id="randomBtn">🔀 สุ่มเพลง</button>
     <button class="action-btn" id="sortBtn">⇅ BPM ↑</button>
   </div>
-
   <div id="randomResult"></div>
   <div id="results"></div>
 </div>
 
 <script>
+
 const MUSIC_DB = [
-  {title:'All of Me',artist:'John Legend',bpm:63,lang:'สากล'},
-  {title:'Perfect',artist:'Ed Sheeran',bpm:63,lang:'สากล'},
-  {title:'Someone Like You',artist:'Adele',bpm:67,lang:'สากล'},
-  {title:'Fix You',artist:'Coldplay',bpm:68,lang:'สากล'},
-  {title:'Through the Night',artist:'IU',bpm:70,lang:'เกาหลี'},
-  {title:'นิทานพันดาว',artist:'Earth Pirapat',bpm:70,lang:'ไทย'},
-  {title:'ลึกสุดใจ',artist:'นูโว',bpm:70,lang:'ไทย'},
-  {title:'รักแท้หรือแค่เหงา',artist:'แก้ม วิชญาณี',bpm:70,lang:'ไทย'},
-  {title:'Ending Scene',artist:'IU',bpm:72,lang:'เกาหลี'},
-  {title:'ดึงดัน',artist:'Cocktail x ตั๊ก ศิริพร',bpm:72,lang:'ไทย'},
-  {title:'กอดในใจ',artist:'Billkin',bpm:72,lang:'ไทย'},
-  {title:'แพ้ใจ',artist:'ใหม่ เจริญปุระ',bpm:72,lang:'ไทย'},
-  {title:'Kataomoi',artist:'Aimer',bpm:72,lang:'ญี่ปุ่น'},
-  {title:'Palette',artist:'IU',bpm:73,lang:'เกาหลี'},
-  {title:'ถ้าเธอรักฉันจริง',artist:'Three Man Down',bpm:74,lang:'ไทย'},
-  {title:'วาดไว้',artist:'BOWKYLION',bpm:75,lang:'ไทย'},
-  {title:'First Love',artist:'Hikaru Utada',bpm:75,lang:'ญี่ปุ่น'},
-  {title:'พิง',artist:'นนท์ ธนนท์',bpm:75,lang:'ไทย'},
-  {title:'ต่อหน้าฉัน(เธอทำอย่างนั้นได้อย่างไร)',artist:'D2B',bpm:75,lang:'ไทย'},
-  {title:'รักคุณเข้าแล้ว',artist:'บอย โกสิยพงษ์',bpm:75,lang:'ไทย'},
-  {title:'รักแรก',artist:'นนท์ ธนนท์',bpm:76,lang:'ไทย'},
-  {title:'นะหน้าทอง',artist:'โจอี้ ภูวศิษฐ์',bpm:78,lang:'ไทย'},
-  {title:'Dried Flower',artist:'Yuuri',bpm:78,lang:'ญี่ปุ่น'},
-  {title:'ลงใจ',artist:'BOWKYLION',bpm:78,lang:'ไทย'},
-  {title:'คนใจอ่อน(อ่อนใจ)',artist:'D2B',bpm:78,lang:'ไทย'},
-  {title:'Marigold',artist:'Aimyon',bpm:78,lang:'ญี่ปุ่น'},
-  {title:'Thinking Out Loud',artist:'Ed Sheeran',bpm:79,lang:'สากล'},
-  {title:'ไม่อาจเปลี่ยนใจ',artist:'เจมส์ เรืองศักดิ์',bpm:80,lang:'ไทย'},
-  {title:'ตราบ',artist:'The TOYS',bpm:80,lang:'ไทย'},
-  {title:'ทิ้งรักลงแม่น้ำ',artist:'Y Not 7',bpm:80,lang:'ไทย'},
-  {title:'เล่าสู่กันฟัง',artist:'เบิร์ด ธงไชย',bpm:80,lang:'ไทย'},
-  {title:'Spring Breeze',artist:'YUI',bpm:80,lang:'ญี่ปุ่น'},
-  {title:'甜甜的',artist:'Jay Chou',bpm:80,lang:'จีน'},
-  {title:'ดวงจันทร์กลางวัน',artist:'Getsunova',bpm:82,lang:'ไทย'},
-  {title:'Stay With Me',artist:'Sam Smith',bpm:84,lang:'สากล'},
-  {title:'Haru Haru',artist:'BIGBANG',bpm:85,lang:'เกาหลี'},
-  {title:'ซ่อนกลิ่น',artist:'Palmy',bpm:85,lang:'ไทย'},
-  {title:'กาลครั้งหนึ่ง',artist:'STAMP x ปู พงษ์สิทธิ์',bpm:85,lang:'ไทย'},
-  {title:'คั่นกู',artist:'Bright Vachirawit',bpm:85,lang:'ไทย'},
-  {title:'คิดถึงฉันไหมเวลาที่เธอ...',artist:'Taxi',bpm:85,lang:'ไทย'},
-  {title:'รักแท้ยังไง',artist:'น้ำชา',bpm:85,lang:'ไทย'},
-  {title:'ฤดูที่แตกต่าง',artist:'บอย โกสิยพงษ์',bpm:85,lang:'ไทย'},
-  {title:'หัวใจไม่ฟัง',artist:'ชิน ชินวุฒ',bpm:85,lang:'ไทย'},
-  {title:'Sparkle',artist:'RADWIMPS',bpm:85,lang:'ญี่ปุ่น'},
-  {title:'Pretender',artist:'Official HIGE DANdism',bpm:85,lang:'ญี่ปุ่น'},
-  {title:'体面 (Decency)',artist:'于文文',bpm:85,lang:'จีน'},
-  {title:'Yellow',artist:'Coldplay',bpm:87,lang:'สากล'},
-  {title:'Burn',artist:'Ellie Goulding',bpm:87,lang:'สากล'},
-  {title:'Lemon',artist:'Kenshi Yonezu',bpm:87,lang:'ญี่ปุ่น'},
-  {title:'สองใจ',artist:'ดา เอ็นโดรฟิน',bpm:88,lang:'ไทย'},
-  {title:'นางฟ้าคนเดิม',artist:'Clash',bpm:88,lang:'ไทย'},
-  {title:'飞鸟和蝉 (Birds and Cicadas)',artist:'任然',bpm:88,lang:'จีน'},
-  {title:'Loser',artist:'BIGBANG',bpm:89,lang:'เกาหลี'},
-  {title:'Love Scenario',artist:'iKON',bpm:89,lang:'เกาหลี'},
-  {title:'Photograph',artist:'Ed Sheeran',bpm:90,lang:'สากล'},
-  {title:'Pink Venom',artist:'BLACKPINK',bpm:90,lang:'เกาหลี'},
-  {title:'คนไกล',artist:'Patrickananda',bpm:90,lang:'ไทย'},
-  {title:'คิดถึงจัง(มาหาหน่อย)',artist:'โอ๊ต ปราโมทย์',bpm:90,lang:'ไทย'},
-  {title:'ภาวนา',artist:'Meyou',bpm:90,lang:'ไทย'},
-  {title:'Cheap Thrills',artist:'Sia',bpm:90,lang:'สากล'},
-  {title:"说好不哭 (Won't Cry)",artist:'Jay Chou',bpm:90,lang:'จีน'},
-  {title:'ยื้อ',artist:'P-HOT',bpm:92,lang:'ไทย'},
-  {title:'One More Time, One More Chance',artist:'Masayoshi Yamazaki',bpm:92,lang:'ญี่ปุ่น'},
-  {title:'告白气球 (Love Confession)',artist:'Jay Chou',bpm:92,lang:'จีน'},
-  {title:'Haru no Hi',artist:'Aimyon',bpm:95,lang:'ญี่ปุ่น'},
-  {title:'ลองรวย',artist:'MAIYARAP',bpm:95,lang:'ไทย'},
-  {title:'ลบ',artist:'URBOYTJ',bpm:95,lang:'ไทย'},
-  {title:'จำเลยรัก',artist:'F.HERO',bpm:95,lang:'ไทย'},
-  {title:'Rap Is Now',artist:'Thaitanium',bpm:95,lang:'ไทย'},
-  {title:'浪人琵琶',artist:'胡 66',bpm:95,lang:'จีน'},
-  {title:'Shape of You',artist:'Ed Sheeran',bpm:96,lang:'สากล'},
-  {title:'BBIBBI',artist:'IU',bpm:98,lang:'เกาหลี'},
-  {title:'Sora wa Aikawarazu',artist:'Kana Nishino',bpm:98,lang:'ญี่ปุ่น'},
-  {title:'心如止水',artist:'Ice Paper',bpm:98,lang:'จีน'},
-  {title:'คิด(แต่ไม่)ถึง',artist:'Tilly Birds',bpm:100,lang:'ไทย'},
-  {title:'Hype Boy',artist:'NewJeans',bpm:100,lang:'เกาหลี'},
-  {title:'ทน',artist:'SPRITE x GUYGEEGEE',bpm:100,lang:'ไทย'},
-  {title:'วาฬเกยตื้น',artist:'GUNGUN',bpm:100,lang:'ไทย'},
-  {title:'เลือดกรุ๊ปบี',artist:'CHRRIS',bpm:100,lang:'ไทย'},
-  {title:'Tentai Kansoku',artist:'BUMP OF CHICKEN',bpm:100,lang:'ญี่ปุ่น'},
-  {title:'แฟนเก่าคนโปรด',artist:'SLAPKISS',bpm:102,lang:'ไทย'},
-  {title:'Rockabye',artist:'Clean Bandit',bpm:102,lang:'สากล'},
-  {title:'Levitating',artist:'Dua Lipa',bpm:103,lang:'สากล'},
-  {title:'Playing with Fire',artist:'BLACKPINK',bpm:104,lang:'เกาหลี'},
-  {title:'Attention',artist:'NewJeans',bpm:105,lang:'เกาหลี'},
-  {title:'Fire Boy',artist:'PP Krit',bpm:105,lang:'ไทย'},
-  {title:'เพื่อนเล่น ไม่เล่นเพื่อน',artist:'Tilly Birds x MILLI',bpm:105,lang:'ไทย'},
-  {title:'Superstar',artist:'D Gerrard',bpm:105,lang:'ไทย'},
-  {title:'Koi',artist:'Gen Hoshino',bpm:105,lang:'ญี่ปุ่น'},
-  {title:'芒种 (Grain in Ear)',artist:'音阙诗听',bpm:105,lang:'จีน'},
-  {title:'Light It Up',artist:'Major Lazer',bpm:108,lang:'สากล'},
-  {title:'Nandemonaiya',artist:'RADWIMPS',bpm:108,lang:'ญี่ปุ่น'},
-  {title:'Mojito',artist:'Jay Chou',bpm:108,lang:'จีน'},
-  {title:'Butter',artist:'BTS',bpm:110,lang:'เกาหลี'},
-  {title:'Mirror Mirror',artist:'F.HERO x MILLI x Changbin',bpm:110,lang:'ไทย'},
-  {title:'One More Night',artist:'Maroon 5',bpm:110,lang:'สากล'},
-  {title:'คนไม่คุย',artist:'PROXIE',bpm:110,lang:'ไทย'},
-  {title:'Bad Boy',artist:'Red Velvet',bpm:110,lang:'เกาหลี'},
-  {title:'红色高跟鞋',artist:'蔡健雅',bpm:110,lang:'จีน'},
-  {title:'วัดปะหล่ะ?',artist:'4EVE',bpm:112,lang:'ไทย'},
-  {title:'Kirari',artist:'Fujii Kaze',bpm:112,lang:'ญี่ปุ่น'},
-  {title:"Can't Stop the Feeling!",artist:'Justin Timberlake',bpm:113,lang:'สากล'},
-  {title:'Dynamite',artist:'BTS',bpm:114,lang:'เกาหลี'},
-  {title:'Mirotic',artist:'TVXQ',bpm:115,lang:'เกาหลี'},
-  {title:'Growl',artist:'EXO',bpm:115,lang:'เกาหลี'},
-  {title:'Uptown Funk',artist:'Mark Ronson',bpm:115,lang:'สากล'},
-  {title:'ไม่ต้องมีคำบรรยาย',artist:'Mr.Team',bpm:115,lang:'ไทย'},
-  {title:'คนมีคู่',artist:'เบิร์ด ธงไชย',bpm:115,lang:'ไทย'},
-  {title:'学猫叫 (Meow Meow)',artist:'小潘潘',bpm:115,lang:'จีน'},
-  {title:'Stronger',artist:'Kelly Clarkson',bpm:116,lang:'สากล'},
-  {title:'Celebrity',artist:'IU',bpm:118,lang:'เกาหลี'},
-  {title:'Flowers',artist:'Miley Cyrus',bpm:118,lang:'สากล'},
-  {title:'โอ้ละหนอ My Love',artist:'เบิร์ด ธงไชย',bpm:118,lang:'ไทย'},
-  {title:'热爱105°C的你',artist:'阿肆',bpm:118,lang:'จีน'},
-  {title:'Love Dive',artist:'IVE',bpm:119,lang:'เกาหลี'},
-  {title:'SAD TURBO',artist:'URBOYTJ',bpm:120,lang:'ไทย'},
-  {title:'Sugar',artist:'Maroon 5',bpm:120,lang:'สากล'},
-  {title:'ตาสว่าง',artist:'Moderndog',bpm:120,lang:'ไทย'},
-  {title:'อย่างน้อย',artist:'Big Ass',bpm:120,lang:'ไทย'},
-  {title:'สองรัก',artist:'Zeal',bpm:120,lang:'ไทย'},
-  {title:'เสียใจแต่ไม่แคร์',artist:'หวาย',bpm:120,lang:'ไทย'},
-  {title:'Kick Back',artist:'Kenshi Yonezu',bpm:120,lang:'ญี่ปุ่น'},
-  {title:'Renai Circulation',artist:'Kana Hanazawa',bpm:120,lang:'ญี่ปุ่น'},
-  {title:'少年 (Young)',artist:'梦然',bpm:120,lang:'จีน'},
-  {title:'Rather Be',artist:'Clean Bandit',bpm:121,lang:'สากล'},
-  {title:'Counting Stars',artist:'OneRepublic',bpm:122,lang:'สากล'},
-  {title:'ห่างกันสักพัก',artist:'หวาย',bpm:122,lang:'ไทย'},
-  {title:'Sign',artist:'Flow',bpm:122,lang:'ญี่ปุ่น'},
-  {title:'大风吹',artist:'王赫野',bpm:122,lang:'จีน'},
-  {title:'Symphony',artist:'Clean Bandit',bpm:123,lang:'สากล'},
-  {title:'Fire',artist:'2NE1',bpm:124,lang:'เกาหลี'},
-  {title:"Don't Start Now",artist:'Dua Lipa',bpm:124,lang:'สากล'},
-  {title:'Talk',artist:'Khalid',bpm:124,lang:'สากล'},
-  {title:'This Is What You Came For',artist:'Calvin Harris',bpm:124,lang:'สากล'},
-  {title:'Wake Me Up',artist:'Avicii',bpm:124,lang:'สากล'},
-  {title:'Mama',artist:'Clean Bandit',bpm:124,lang:'สากล'},
-  {title:"As If It's Your Last",artist:'BLACKPINK',bpm:125,lang:'เกาหลี'},
-  {title:'Very Nice',artist:'SEVENTEEN',bpm:125,lang:'เกาหลี'},
-  {title:'Hey Brother',artist:'Avicii',bpm:125,lang:'สากล'},
-  {title:'ไม่รักดี',artist:'Paper Jam',bpm:125,lang:'ไทย'},
-  {title:'ปรากฏการณ์',artist:'Bodyslam',bpm:125,lang:'ไทย'},
-  {title:'ผ้าเช็ดหน้า',artist:'Triumphs Kingdom',bpm:125,lang:'ไทย'},
-  {title:'จีบได้แฟนไม่รัก',artist:'หวาย',bpm:125,lang:'ไทย'},
-  {title:'Blue Bird',artist:'Ikimonogakari',bpm:125,lang:'ญี่ปุ่น'},
-  {title:'爱你 (Love)',artist:'Cyndi Wang',bpm:125,lang:'จีน'},
-  {title:'Gentleman',artist:'PSY',bpm:126,lang:'เกาหลี'},
-  {title:'Titanium',artist:'David Guetta',bpm:126,lang:'สากล'},
-  {title:'The Nights',artist:'Avicii',bpm:126,lang:'สากล'},
-  {title:'Levels',artist:'Avicii',bpm:126,lang:'สากล'},
-  {title:'Fantastic Baby',artist:'BIGBANG',bpm:128,lang:'เกาหลี'},
-  {title:'Sorry Sorry',artist:'Super Junior',bpm:128,lang:'เกาหลี'},
-  {title:'Ring Ding Dong',artist:'SHINee',bpm:128,lang:'เกาหลี'},
-  {title:'I Am The Best',artist:'2NE1',bpm:128,lang:'เกาหลี'},
-  {title:'Cheer Up',artist:'TWICE',bpm:128,lang:'เกาหลี'},
-  {title:'ค้างคา',artist:'LOMOSONIC',bpm:128,lang:'ไทย'},
-  {title:'แว้นฟ้อหล่อเฟี้ยว',artist:'แจ๊ส สปุ๊กนิค',bpm:128,lang:'ไทย'},
-  {title:'Moves Like Jagger',artist:'Maroon 5',bpm:128,lang:'สากล'},
-  {title:'Clarity',artist:'Zedd',bpm:128,lang:'สากล'},
-  {title:'Animals',artist:'Martin Garrix',bpm:128,lang:'สากล'},
-  {title:'Waiting For Love',artist:'Avicii',bpm:128,lang:'สากล'},
-  {title:'Feel So Close',artist:'Calvin Harris',bpm:128,lang:'สากล'},
-  {title:'Summer',artist:'Calvin Harris',bpm:128,lang:'สากล'},
-  {title:'สาธุ',artist:'Boom Boom Cash',bpm:128,lang:'ไทย'},
-  {title:'หนาว',artist:'Clash',bpm:128,lang:'ไทย'},
-  {title:'อย่าเข้าใจฉันผิด',artist:'Triumphs Kingdom',bpm:128,lang:'ไทย'},
-  {title:'คืนนี้อยากได้กี่ครั้ง',artist:'ชิน ชินวุฒ',bpm:128,lang:'ไทย'},
-  {title:'Guren no Yumiya',artist:'Linked Horizon',bpm:128,lang:'ญี่ปุ่น'},
-  {title:'Connect',artist:'ClariS',bpm:128,lang:'ญี่ปุ่น'},
-  {title:'不仅仅是喜欢',artist:'萧全',bpm:128,lang:'จีน'},
-  {title:'Daddy',artist:'PSY',bpm:129,lang:'เกาหลี'},
-  {title:'Cooler Than Me',artist:'Mike Posner',bpm:129,lang:'สากล'},
-  {title:'Good Day',artist:'IU',bpm:130,lang:'เกาหลี'},
-  {title:'Gee',artist:'SNSD',bpm:130,lang:'เกาหลี'},
-  {title:'Heartbeat',artist:'2PM',bpm:130,lang:'เกาหลี'},
-  {title:'TT',artist:'TWICE',bpm:130,lang:'เกาหลี'},
-  {title:'Russian Roulette',artist:'Red Velvet',bpm:130,lang:'เกาหลี'},
-  {title:'How You Like That',artist:'BLACKPINK',bpm:130,lang:'เกาหลี'},
-  {title:'Timber',artist:'Pitbull',bpm:130,lang:'สากล'},
-  {title:'อกหัก',artist:'Bodyslam',bpm:130,lang:'ไทย'},
-  {title:'แฟนคลับ',artist:'Clash',bpm:130,lang:'ไทย'},
-  {title:'Kill This Love',artist:'BLACKPINK',bpm:131,lang:'เกาหลี'},
-  {title:'Gangnam Style',artist:'PSY',bpm:132,lang:'เกาหลี'},
-  {title:'History Maker',artist:'Dean Fujioka',bpm:132,lang:'ญี่ปุ่น'},
-  {title:'Ditto',artist:'NewJeans',bpm:134,lang:'เกาหลี'},
-  {title:'In the Name of Love',artist:'Martin Garrix',bpm:134,lang:'สากล'},
-  {title:'Fancy',artist:'TWICE',bpm:135,lang:'เกาหลี'},
-  {title:'Bad Guy',artist:'Billie Eilish',bpm:135,lang:'สากล'},
-  {title:'เสก',artist:'LOMOSONIC',bpm:135,lang:'ไทย'},
-  {title:'Gurenge',artist:'LiSA',bpm:135,lang:'ญี่ปุ่น'},
-  {title:'ธาตุทองซาวด์',artist:'YOUNGOHM',bpm:135,lang:'ไทย'},
-  {title:'Blueprint Supreme',artist:'Skai (prod. by isyourgod)',bpm:135,lang:'จีน'},
-  {title:'失恋阵线联盟',artist:'草蜢',bpm:135,lang:'จีน'},
-  {title:'BANG BANG BANG',artist:'BIGBANG',bpm:138,lang:'เกาหลี'},
-  {title:'Viva La Vida',artist:'Coldplay',bpm:138,lang:'สากล'},
-  {title:'Scared to be Lonely',artist:'Martin Garrix',bpm:138,lang:'สากล'},
-  {title:'Shine',artist:'Ikimonogakari',bpm:138,lang:'ญี่ปุ่น'},
-  {title:'DDU-DU DDU-DU',artist:'BLACKPINK',bpm:140,lang:'เกาหลี'},
-  {title:'Solo',artist:'JENNIE',bpm:140,lang:'เกาหลี'},
-  {title:'Unravel',artist:'TK from Ling Tosite Sigure',bpm:140,lang:'ญี่ปุ่น'},
-  {title:'惊雷 (Jingle)',artist:'MC 六道',bpm:140,lang:'จีน'},
-  {title:'ทรงอย่างแบด',artist:'Paper Planes',bpm:145,lang:'ไทย'},
-  {title:'Silhouette',artist:'KANA-BOON',bpm:145,lang:'ญี่ปุ่น'},
-  {title:"Can't Hold Us",artist:'Macklemore',bpm:146,lang:'สากล'},
-  {title:'Mr. Brightside',artist:'The Killers',bpm:148,lang:'สากล'},
-  {title:'Colors',artist:'FLOW',bpm:148,lang:'ญี่ปุ่น'},
-  {title:'Bang Bang',artist:'Jessie J',bpm:150,lang:'สากล'},
-  {title:'Crossing Field',artist:'LiSA',bpm:150,lang:'ญี่ปุ่น'},
-  {title:'Immortals',artist:'Fall Out Boy',bpm:153,lang:'สากล'},
-  {title:"Don't Stop Me Now",artist:'Queen',bpm:156,lang:'สากล'},
-  {title:'Shake It Off',artist:'Taylor Swift',bpm:160,lang:'สากล'},
-  {title:'Kaikai Kitan',artist:'Eve',bpm:165,lang:'ญี่ปุ่น'},
-  {title:'Idol',artist:'YOASOBI',bpm:166,lang:'ญี่ปุ่น'},
-  {title:'Good 4 u',artist:'Olivia Rodrigo',bpm:167,lang:'สากล'},
-  {title:'Centuries',artist:'Fall Out Boy',bpm:167,lang:'สากล'},
-  {title:'Again',artist:'YUI',bpm:168,lang:'ญี่ปุ่น'},
-  {title:'Stay',artist:'The Kid LAROI',bpm:170,lang:'สากล'},
-  {title:'Monster',artist:'YOASOBI',bpm:170,lang:'ญี่ปุ่น'},
-  {title:'Cruel Summer',artist:'Taylor Swift',bpm:170,lang:'สากล'},
-  {title:'Brave Shine',artist:'Aimer',bpm:170,lang:'ญี่ปุ่น'},
-  {title:'Blinding Lights',artist:'The Weeknd',bpm:171,lang:'สากล'},
-  {title:'As It Was',artist:'Harry Styles',bpm:174,lang:'สากล'},
-  {title:'Uso',artist:'SID',bpm:175,lang:'ญี่ปุ่น'},
-  {title:'THE DAY',artist:'Porno Graffitti',bpm:180,lang:'ญี่ปุ่น'},
-  {title:'Rising Hope',artist:'LiSA',bpm:185,lang:'ญี่ปุ่น'},
+  {title:'All of Me', artist:'John Legend', bpm:63, lang:'สากล', url:'https://music.youtube.com/watch?v=sQtnhwU2R9Y&autoplay=1'},
+  {title:'Perfect', artist:'Ed Sheeran', bpm:63, lang:'สากล', url:'https://music.youtube.com/watch?v=ORrFJ63nlcA&autoplay=1'},
+  {title:'Someone Like You', artist:'Adele', bpm:67, lang:'สากล', url:'https://music.youtube.com/watch?v=XqoanTj5pNY&autoplay=1'},
+  {title:'Fix You', artist:'Coldplay', bpm:68, lang:'สากล', url:'https://music.youtube.com/watch?v=Oncu0bgdcXU&autoplay=1'},
+  {title:'Through the Night', artist:'IU', bpm:70, lang:'เกาหลี', url:'https://music.youtube.com/watch?v=NnRjwEhFU70&autoplay=1'},
+  {title:'นิทานพันดาว', artist:'Earth Pirapat', bpm:70, lang:'ไทย', url:'https://music.youtube.com/watch?v=o2-zvE_2i-k&autoplay=1'},
+  {title:'ลึกสุดใจ', artist:'นูโว', bpm:70, lang:'ไทย', url:'https://music.youtube.com/watch?v=uaWKmTIk07o&autoplay=1'},
+  {title:'รักแท้หรือแค่เหงา', artist:'แก้ม วิชญาณี', bpm:70, lang:'ไทย', url:'https://music.youtube.com/watch?v=MZwWswfyBMQ&autoplay=1'},
+  {title:'Ending Scene', artist:'IU', bpm:72, lang:'เกาหลี', url:'https://music.youtube.com/watch?v=ybiINVA_gLc&autoplay=1'},
+  {title:'ดึงดัน', artist:'Cocktail x ตั๊ก ศิริพร', bpm:72, lang:'ไทย', url:'https://music.youtube.com/watch?v=npgZwRSAdcU&autoplay=1'},
+  {title:'กอดในใจ', artist:'Billkin', bpm:72, lang:'ไทย', url:'https://music.youtube.com/watch?v=VxQed86Im0w&autoplay=1'},
+  {title:'แพ้ใจ', artist:'ใหม่ เจริญปุระ', bpm:72, lang:'ไทย', url:'https://music.youtube.com/watch?v=DY6D15_zvk0&autoplay=1'},
+  {title:'Kataomoi', artist:'Aimer', bpm:72, lang:'ญี่ปุ่น', url:'https://music.youtube.com/watch?v=NFHPLE4Tl0I&autoplay=1'},
+  {title:'Palette', artist:'IU', bpm:73, lang:'เกาหลี', url:'https://music.youtube.com/watch?v=2C1Jg04INb4&autoplay=1'},
+  {title:'ถ้าเธอรักฉันจริง', artist:'Three Man Down', bpm:74, lang:'ไทย', url:'https://music.youtube.com/watch?v=eOxNncYyG00&autoplay=1'},
+  {title:'วาดไว้', artist:'BOWKYLION', bpm:75, lang:'ไทย', url:'https://music.youtube.com/watch?v=t1k1PISpmzY&autoplay=1'},
+  {title:'First Love', artist:'Hikaru Utada', bpm:75, lang:'ญี่ปุ่น', url:'https://music.youtube.com/watch?v=IGldkA5dG8o&autoplay=1'},
+  {title:'พิง', artist:'นนนท์ ธนนท์', bpm:75, lang:'ไทย', url:'https://music.youtube.com/watch?v=toRCUtAU7D0&autoplay=1'},
+  {title:'ต่อหน้าฉัน(เธอทำอย่างนั้นได้อย่างไร)', artist:'D2B', bpm:75, lang:'ไทย', url:'https://music.youtube.com/watch?v=ikZS-kYzYb0&autoplay=1'},
+  {title:'รักคุณเข้าแล้ว', artist:'บอย โกสิยพงษ์', bpm:75, lang:'ไทย', url:'https://music.youtube.com/watch?v=T8rcGhngbuA&autoplay=1'},
+  {title:'รักแรก', artist:'นนนท์ ธนนท์', bpm:76, lang:'ไทย', url:'https://music.youtube.com/watch?v=GsWcUoU5Qb4&autoplay=1'},
+  {title:'นะหน้าทอง', artist:'โจอี้ ภูวศิษฐ์', bpm:78, lang:'ไทย', url:'https://music.youtube.com/watch?v=SZMepaJ1lB4&autoplay=1'},
+  {title:'Dried Flower', artist:'Yuuri', bpm:78, lang:'ญี่ปุ่น', url:'https://music.youtube.com/watch?v=vwstRC5Jl9w&autoplay=1'},
+  {title:'ลงใจ', artist:'BOWKYLION', bpm:78, lang:'ไทย', url:'https://music.youtube.com/watch?v=fFYsT-bm7ZM&autoplay=1'},
+  {title:'คนใจอ่อน(อ่อนใจ)', artist:'D2B', bpm:78, lang:'ไทย', url:'https://music.youtube.com/watch?v=raPSaVWIaX0&autoplay=1'},
+  {title:'Marigold', artist:'Aimyon', bpm:78, lang:'ญี่ปุ่น', url:'https://music.youtube.com/watch?v=UbxtCV8nXnA&autoplay=1'},
+  {title:'Thinking Out Loud', artist:'Ed Sheeran', bpm:79, lang:'สากล', url:'https://music.youtube.com/watch?v=fdz_cabS9BU&autoplay=1'},
+  {title:'ไม่อาจเปลี่ยนใจ', artist:'เจมส์ เรืองศักดิ์', bpm:80, lang:'ไทย', url:'https://music.youtube.com/watch?v=XMzCOgQtG-0&autoplay=1'},
+  {title:'ตราบ', artist:'The TOYS', bpm:80, lang:'ไทย', url:'https://music.youtube.com/watch?v=2Mw-KrCaj58&autoplay=1'},
+  {title:'ทิ้งรักลงแม่น้ำ', artist:'Y Not 7', bpm:80, lang:'ไทย', url:'https://music.youtube.com/watch?v=9qAd6Vnwud8&autoplay=1'},
+  {title:'เล่าสู่กันฟัง', artist:'เบิร์ด ธงไชย', bpm:80, lang:'ไทย', url:'https://music.youtube.com/watch?v=NEBW-N44eBE&autoplay=1'},
+  {title:'Spring Breeze', artist:'YUI', bpm:80, lang:'ญี่ปุ่น', url:'https://music.youtube.com/watch?v=jDZ8Yc344qk&autoplay=1'},
+  {title:'甜甜的', artist:'Jay Chou', bpm:80, lang:'จีน', url:'https://music.youtube.com/watch?v=l1ufPHu06HY&autoplay=1'},
+  {title:'ดวงจันทร์กลางวัน', artist:'Getsunova', bpm:82, lang:'ไทย', url:'https://music.youtube.com/watch?v=FZIYmfSoFYE&autoplay=1'},
+  {title:'Stay With Me', artist:'Sam Smith', bpm:84, lang:'สากล', url:'https://music.youtube.com/watch?v=xQmfvh54uL4&autoplay=1'},
+  {title:'Haru Haru', artist:'BIGBANG', bpm:85, lang:'เกาหลี', url:'https://music.youtube.com/watch?v=c84VnpGFbrw&autoplay=1'},
+  {title:'ซ่อนกลิ่น', artist:'Palmy', bpm:85, lang:'ไทย', url:'https://music.youtube.com/watch?v=4TA5fBaw1v4&autoplay=1'},
+  {title:'กาลครั้งหนึ่ง', artist:'STAMP x ปู พงษ์สิทธิ์', bpm:85, lang:'ไทย', url:'https://music.youtube.com/watch?v=TBTI7_90o8U&autoplay=1'},
+  {title:'คั่นกู', artist:'Bright Vachirawit', bpm:85, lang:'ไทย', url:'https://music.youtube.com/watch?v=7VQmLhvtDps&autoplay=1'},
+  {title:'คิดถึงฉันไหมเวลาที่เธอ...', artist:'Taxi', bpm:85, lang:'ไทย', url:'https://music.youtube.com/watch?v=_-AYntUF9pM&autoplay=1'},
+  {title:'รักแท้ยังไง', artist:'น้ำชา', bpm:85, lang:'ไทย', url:'https://music.youtube.com/watch?v=C6g3YQB78T8&autoplay=1'},
+  {title:'ฤดูที่แตกต่าง', artist:'บอย โกสิยพงษ์', bpm:85, lang:'ไทย', url:'https://music.youtube.com/watch?v=0kw5lMciW4c&autoplay=1'},
+  {title:'หัวใจไม่ฟัง', artist:'ชิน ชินวุฒ', bpm:85, lang:'ไทย', url:'https://music.youtube.com/watch?v=nTX1fqdaZfo&autoplay=1'},
+  {title:'Sparkle', artist:'RADWIMPS', bpm:85, lang:'ญี่ปุ่น', url:'https://music.youtube.com/watch?v=-J9FuvPmMoI&autoplay=1'},
+  {title:'Pretender', artist:'Official HIGE DANdism', bpm:85, lang:'ญี่ปุ่น', url:'https://music.youtube.com/watch?v=37W7Y2RRyiM&autoplay=1'},
+  {title:'体面 (Decency)', artist:'于文文', bpm:85, lang:'จีน', url:'https://music.youtube.com/watch?v=YaVN4MUhYo8&autoplay=1'},
+  {title:'Yellow', artist:'Coldplay', bpm:87, lang:'สากล', url:'https://music.youtube.com/watch?v=9qnqYL0eNNI&autoplay=1'},
+  {title:'Burn', artist:'Ellie Goulding', bpm:87, lang:'สากล', url:'https://music.youtube.com/watch?v=Yw-vvxnG9Y4&autoplay=1'},
+  {title:'Lemon', artist:'Kenshi Yonezu', bpm:87, lang:'ญี่ปุ่น', url:'https://music.youtube.com/watch?v=3NNhrqHZqlI&autoplay=1'},
+  {title:'สองใจ', artist:'ดา เอ็นโดรฟิน', bpm:88, lang:'ไทย', url:'https://music.youtube.com/watch?v=yNLuEyadtPU&autoplay=1'},
+  {title:'นางฟ้าคนเดิม', artist:'Clash', bpm:88, lang:'ไทย', url:'https://music.youtube.com/watch?v=pB382cuCf-k&autoplay=1'},
+  {title:'飞鸟和蝉 (Birds and Cicadas)', artist:'任然', bpm:88, lang:'จีน', url:'https://music.youtube.com/watch?v=JF4ltX1xntY&autoplay=1'},
+  {title:'Loser', artist:'BIGBANG', bpm:89, lang:'เกาหลี', url:'https://music.youtube.com/watch?v=0l_NZphW4dU&autoplay=1'},
+  {title:'Love Scenario', artist:'iKON', bpm:89, lang:'เกาหลี', url:'https://music.youtube.com/watch?v=OmEPFmyKO74&autoplay=1'},
+  {title:'Photograph', artist:'Ed Sheeran', bpm:90, lang:'สากล', url:'https://music.youtube.com/watch?v=SlbfAYvA_gI&autoplay=1'},
+  {title:'Pink Venom', artist:'BLACKPINK', bpm:90, lang:'เกาหลี', url:'https://music.youtube.com/watch?v=4N15045PHEA&autoplay=1'},
+  {title:'คนไกล', artist:'Patrickananda', bpm:90, lang:'ไทย', url:'https://music.youtube.com/watch?v=f4yVDvllWik&autoplay=1'},
+  {title:'คิดถึงจัง(มาหาหน่อย)', artist:'โอ๊ต ปราโมทย์', bpm:90, lang:'ไทย', url:'https://music.youtube.com/watch?v=Gd5EmTw8Ca8&autoplay=1'},
+  {title:'ภาวนา', artist:'Meyou', bpm:90, lang:'ไทย', url:'https://music.youtube.com/watch?v=W6QPD2TaFf0&autoplay=1'},
+  {title:'Cheap Thrills', artist:'Sia', bpm:90, lang:'สากล', url:'https://music.youtube.com/watch?v=K_idN3P5_yk&autoplay=1'},
+  {title:'说好不哭 (Won\'t Cry)', artist:'Jay Chou', bpm:90, lang:'จีน', url:'https://music.youtube.com/watch?v=OQwnI4HWZLI&autoplay=1'},
+  {title:'ยื้อ', artist:'P-HOT', bpm:92, lang:'ไทย', url:'https://music.youtube.com/watch?v=mOwnyiDHqlQ&autoplay=1'},
+  {title:'One More Time, One More Chance', artist:'Masayoshi Yamazaki', bpm:92, lang:'ญี่ปุ่น', url:'https://music.youtube.com/watch?v=GgDLuuiKVPs&autoplay=1'},
+  {title:'告白气球 (Love Confession)', artist:'Jay Chou', bpm:92, lang:'จีน', url:'https://music.youtube.com/watch?v=cSqlwNjq77c&autoplay=1'},
+  {title:'Haru no Hi', artist:'Aimyon', bpm:95, lang:'ญี่ปุ่น', url:'https://music.youtube.com/watch?v=Po2Ujyn8SXE&autoplay=1'},
+  {title:'ลองรวย', artist:'MAIYARAP', bpm:95, lang:'ไทย', url:'https://music.youtube.com/watch?v=xwJeJsO9GAo&autoplay=1'},
+  {title:'ลบ', artist:'URBOYTJ', bpm:95, lang:'ไทย', url:'https://music.youtube.com/watch?v=ao_PcobFlr8&autoplay=1'},
+  {title:'จำเลยรัก', artist:'F.HERO', bpm:95, lang:'ไทย', url:'https://music.youtube.com/watch?v=1VVPE1N3EXg&autoplay=1'},
+  {title:'Rap Is Now', artist:'Thaitanium', bpm:95, lang:'ไทย', url:'https://music.youtube.com/watch?v=YAY8257bGOM&autoplay=1'},
+  {title:'浪人琵琶', artist:'胡 66', bpm:95, lang:'จีน', url:'https://music.youtube.com/watch?v=N-RZKm29Qz8&autoplay=1'},
+  {title:'Shape of You', artist:'Ed Sheeran', bpm:96, lang:'สากล', url:'https://music.youtube.com/watch?v=xTvyyoF_LZY&autoplay=1'},
+  {title:'BBIBBI', artist:'IU', bpm:98, lang:'เกาหลี', url:'https://music.youtube.com/watch?v=BZqfL_2CzKg&autoplay=1'},
+  {title:'Sora wa Aikawarazu', artist:'Kana Nishino', bpm:98, lang:'ญี่ปุ่น', url:'https://music.youtube.com/watch?v=p0Qpyi2EpHM&autoplay=1'},
+  {title:'心如止水', artist:'Ice Paper', bpm:98, lang:'จีน', url:'https://music.youtube.com/watch?v=9GUjMwoZJUg&autoplay=1'},
+  {title:'คิด(แต่ไม่)ถึง', artist:'Tilly Birds', bpm:100, lang:'ไทย', url:'https://music.youtube.com/watch?v=OOMeQ4RL0Bs&autoplay=1'},
+  {title:'Hype Boy', artist:'NewJeans', bpm:100, lang:'เกาหลี', url:'https://music.youtube.com/watch?v=ghrlZIMDzbM&autoplay=1'},
+  {title:'ทน', artist:'SPRITE x GUYGEEGEE', bpm:100, lang:'ไทย', url:'https://music.youtube.com/watch?v=Nih83oJBCzg&autoplay=1'},
+  {title:'วาฬเกยตื้น', artist:'GUNGUN', bpm:100, lang:'ไทย', url:'https://music.youtube.com/watch?v=as6e-IW1HKc&autoplay=1'},
+  {title:'เลือดกรุ๊ปบี', artist:'CHRRIS', bpm:100, lang:'ไทย', url:'https://music.youtube.com/watch?v=YGBY2b5Gq3I&autoplay=1'},
+  {title:'Tentai Kansoku', artist:'BUMP OF CHICKEN', bpm:100, lang:'ญี่ปุ่น', url:'https://music.youtube.com/watch?v=M_Uz5SKGxs4&autoplay=1'},
+  {title:'แฟนเก่าคนโปรด', artist:'SLAPKISS', bpm:102, lang:'ไทย', url:'https://music.youtube.com/watch?v=7dEZ-cw_Oug&autoplay=1'},
+  {title:'Rockabye', artist:'Clean Bandit', bpm:102, lang:'สากล', url:'https://music.youtube.com/watch?v=mVw5KiGwqaQ&autoplay=1'},
+  {title:'Levitating', artist:'Dua Lipa', bpm:103, lang:'สากล', url:'https://music.youtube.com/watch?v=OsfAnsMY21M&autoplay=1'},
+  {title:'Playing with Fire', artist:'BLACKPINK', bpm:104, lang:'เกาหลี', url:'https://music.youtube.com/watch?v=ei0k_1Uro-U&autoplay=1'},
+  {title:'Attention', artist:'NewJeans', bpm:105, lang:'เกาหลี', url:'https://music.youtube.com/watch?v=kdOS94IjzzE&autoplay=1'},
+  {title:'Fire Boy', artist:'PP Krit', bpm:105, lang:'ไทย', url:'https://music.youtube.com/watch?v=8O4q-RCjL3E&autoplay=1'},
+  {title:'เพื่อนเล่น ไม่เล่นเพื่อน', artist:'Tilly Birds x MILLI', bpm:105, lang:'ไทย', url:'https://music.youtube.com/watch?v=vYApNdONrYA&autoplay=1'},
+  {title:'Superstar', artist:'D Gerrard', bpm:105, lang:'ไทย', url:'https://music.youtube.com/watch?v=HfucPKSHlcw&autoplay=1'},
+  {title:'Koi', artist:'Gen Hoshino', bpm:105, lang:'ญี่ปุ่น', url:'https://music.youtube.com/watch?v=KMdTrqzEI0I&autoplay=1'},
+  {title:'芒种 (Grain in Ear)', artist:'音阙诗听', bpm:105, lang:'จีน', url:'https://music.youtube.com/watch?v=ggEX7T-EMQY&autoplay=1'},
+  {title:'How You Like That', artist:'BLACKPINK', bpm:105, lang:'เกาหลี', url:'https://music.youtube.com/watch?v=8mA6jIeojnk&autoplay=1'},
+  {title:'ขวัญเอยขวัญมา', artist:'Palmy', bpm:106, lang:'ไทย', url:'https://music.youtube.com/watch?v=f7j_PqpmVIM&autoplay=1'},
+  {title:'I Like Me Better', artist:'Lauv', bpm:107, lang:'สากล', url:'https://music.youtube.com/watch?v=MsSIVZlqC9w&autoplay=1'},
+  {title:'Dynamite', artist:'BTS', bpm:110, lang:'เกาหลี', url:'https://music.youtube.com/watch?v=HaEYUJ2aRHs&autoplay=1'},
+  {title:'DDU-DU DDU-DU', artist:'BLACKPINK', bpm:110, lang:'เกาหลี', url:'https://music.youtube.com/watch?v=IPzouyj7FLA&autoplay=1'},
+  {title:'รักติดไซเรน', artist:'ไอซ์ พาริส x แพรวา', bpm:110, lang:'ไทย', url:'https://music.youtube.com/watch?v=UAG-QJrMCGA&autoplay=1'},
+  {title:'กอด', artist:'Bedroom Audio', bpm:110, lang:'ไทย', url:'https://music.youtube.com/watch?v=YkRsQiJZiz0&autoplay=1'},
+  {title:'รักแรกพบ', artist:'Tattoo Colour', bpm:110, lang:'ไทย', url:'https://music.youtube.com/watch?v=mXEX4I0FNRs&autoplay=1'},
+  {title:'วัดปะหล่ะ', artist:'4EVE', bpm:110, lang:'ไทย', url:'https://music.youtube.com/watch?v=q7MnV1mqmdk&autoplay=1'},
+  {title:'แอบดี', artist:'Stamp', bpm:110, lang:'ไทย', url:'https://music.youtube.com/watch?v=RG6lE_qORYw&autoplay=1'},
+  {title:'Kimi no Na wa', artist:'RADWIMPS', bpm:110, lang:'ญี่ปุ่น', url:'https://music.youtube.com/browse/MPREb_V2p5gPgQteI&autoplay=1'},
+  {title:'青鸟 (Blue Bird)', artist:'Ikimonogakari', bpm:110, lang:'ญี่ปุ่น', url:'https://music.youtube.com/watch?v=udNgJUiBCRg&autoplay=1'},
+  {title:'小幸运 (A Little Happiness)', artist:'Hebe Tien', bpm:112, lang:'จีน', url:'https://music.youtube.com/watch?v=YD9r_tTtlaA&autoplay=1'},
+  {title:'นับหนึ่งถึงร้อย', artist:'นนนท์ ธนนท์', bpm:112, lang:'ไทย', url:'https://music.youtube.com/watch?v=IiU8U6ZhHWs&autoplay=1'},
+  {title:'หนี', artist:'อะตอม ชนกันต์', bpm:112, lang:'ไทย', url:'https://music.youtube.com/watch?v=68WtMfsAReI&autoplay=1'},
+  {title:'Don\'t Know Why', artist:'Norah Jones', bpm:115, lang:'สากล', url:'https://music.youtube.com/watch?v=GtOcxj3NDBI&autoplay=1'},
+  {title:'Stay', artist:'The Kid LAROI & Justin Bieber', bpm:115, lang:'สากล', url:'https://music.youtube.com/watch?v=XfEMj-z3TtA&autoplay=1'},
+  {title:'SOLO', artist:'JENNIE', bpm:115, lang:'เกาหลี', url:'https://music.youtube.com/watch?v=4-4COoO5Qdg&autoplay=1'},
+  {title:'ลาลาลอย', artist:'The TOYS', bpm:115, lang:'ไทย', url:'https://music.youtube.com/watch?v=B6QRhKpAoDo&autoplay=1'},
+  {title:'คุกเข่า', artist:'Cocktail', bpm:115, lang:'ไทย', url:'https://music.youtube.com/watch?v=oTte0EEC1ms&autoplay=1'},
+  {title:'ขอบคุณที่รักกัน', artist:'Potato', bpm:115, lang:'ไทย', url:'https://music.youtube.com/watch?v=A8rsjMrNqN0&autoplay=1'},
+  {title:'ซบที่ไหล่', artist:'นนนท์ ธนนท์', bpm:115, lang:'ไทย', url:'https://music.youtube.com/watch?v=ShCwR0Wy_OI&autoplay=1'},
+  {title:'Love Letter', artist:'YUI', bpm:115, lang:'ญี่ปุ่น', url:'https://music.youtube.com/watch?v=5EaYclSxbII&autoplay=1'},
+  {title:'前前前世', artist:'RADWIMPS', bpm:115, lang:'ญี่ปุ่น', url:'https://music.youtube.com/watch?v=qp0AktOIAag&autoplay=1'},
+  {title:'告白', artist:'Supercell', bpm:115, lang:'ญี่ปุ่น', url:'https://music.youtube.com/watch?v=gMeOKpu7GBU&autoplay=1'},
+  {title:'最长的电影', artist:'Jay Chou', bpm:118, lang:'จีน', url:'https://music.youtube.com/watch?v=HwTlELG2fqA&autoplay=1'},
+  {title:'ไม่บอกเธอ', artist:'Bedroom Audio', bpm:118, lang:'ไทย', url:'https://music.youtube.com/watch?v=ABDIqJbjr_w&autoplay=1'},
+  {title:'ปล่อย', artist:'ป๊อบ ปองกูล', bpm:118, lang:'ไทย', url:'https://music.youtube.com/watch?_XC7Jj47Mdg&autoplay=1'},
+  {title:'SAD TURBO', artist:'URBOYTJ', bpm:120, lang:'ไทย', url:'https://music.youtube.com/watch?v=cODvoNIgtKI&autoplay=1'},
+  {title:'Sugar', artist:'Maroon 5', bpm:120, lang:'สากล', url:'https://music.youtube.com/watch?v=wSOc5jmvF-k&autoplay=1'},
+  {title:'ตาสว่าง', artist:'Moderndog', bpm:120, lang:'ไทย', url:'https://music.youtube.com/watch?v=nUrsY6BQhk4&autoplay=1'},
+  {title:'อย่างน้อย', artist:'Big Ass', bpm:120, lang:'ไทย', url:'https://music.youtube.com/watch?v=vppFQ6i2sko&autoplay=1'},
+  {title:'สองรัก', artist:'Zeal', bpm:120, lang:'ไทย', url:'https://music.youtube.com/watch?_EqJapHgERI&autoplay=1'},
+  {title:'เสียใจแต่ไม่แคร์', artist:'หวาย', bpm:120, lang:'ไทย', url:'https://music.youtube.com/watch?v=X3RROUmiS6o&autoplay=1'},
+  {title:'Kick Back', artist:'Kenshi Yonezu', bpm:120, lang:'ญี่ปุ่น', url:'https://music.youtube.com/watch?v=NMA_isZYsYQ&autoplay=1'},
+  {title:'Renai Circulation', artist:'Kana Hanazawa', bpm:120, lang:'ญี่ปุ่น', url:'https://music.youtube.com/watch?v=F8xpmTmdf6o&autoplay=1'},
+  {title:'少年 (Young)', artist:'梦然', bpm:120, lang:'จีน', url:'https://music.youtube.com/watch?v=7NA8I8-6fyE&autoplay=1'},
+  {title:'Rather Be', artist:'Clean Bandit', bpm:121, lang:'สากล', url:'https://music.youtube.com/watch?v=dHdMAdh4Xgc&autoplay=1'},
+  {title:'Counting Stars', artist:'OneRepublic', bpm:122, lang:'สากล', url:'https://music.youtube.com/watch?_GWKkqNoyEA&autoplay=1'},
+  {title:'ห่างกันสักพัก', artist:'หวาย', bpm:122, lang:'ไทย', url:'https://music.youtube.com/watch?v=yHKt_m-tZZA&autoplay=1'},
+  {title:'Sign', artist:'Flow', bpm:122, lang:'ญี่ปุ่น', url:'https://music.youtube.com/watch?v=csVeFCLhmAM&autoplay=1'},
+  {title:'大风吹', artist:'王赫野', bpm:122, lang:'จีน', url:'https://music.youtube.com/watch?_2ysVWC5n-U&autoplay=1'},
+  {title:'Symphony', artist:'Clean Bandit', bpm:123, lang:'สากล', url:'https://music.youtube.com/watch?-SttFgyRNCI&autoplay=1'},
+  {title:'Fire', artist:'2NE1', bpm:124, lang:'เกาหลี', url:'https://music.youtube.com/watch?v=48ZRVhNl1wA&autoplay=1'},
+  {title:'Don\'t Start Now', artist:'Dua Lipa', bpm:124, lang:'สากล', url:'https://music.youtube.com/watch?v=htg8v0g_4e4&autoplay=1'},
+  {title:'Talk', artist:'Khalid', bpm:124, lang:'สากล', url:'https://music.youtube.com/watch?v=tEpuiZm94OQ&autoplay=1'},
+  {title:'This Is What You Came For', artist:'Calvin Harris', bpm:124, lang:'สากล', url:'https://music.youtube.com/watch?v=inCm3ByI17o&autoplay=1'},
+  {title:'Wake Me Up', artist:'Avicii', bpm:124, lang:'สากล', url:'https://music.youtube.com/watch?v=2NiyrtYegso&autoplay=1'},
+  {title:'Mama', artist:'Clean Bandit', bpm:124, lang:'สากล', url:'https://music.youtube.com/watch?v=eAAMbnKqw7E&autoplay=1'},
+  {title:'As If It\'s Your Last', artist:'BLACKPINK', bpm:125, lang:'เกาหลี', url:'https://music.youtube.com/watch?v=9MbXeqCbS4Q&autoplay=1'},
+  {title:'Very Nice', artist:'SEVENTEEN', bpm:125, lang:'เกาหลี', url:'https://music.youtube.com/watch?v=s3CjsNjiKyc&autoplay=1'},
+  {title:'Hey Brother', artist:'Avicii', bpm:125, lang:'สากล', url:'https://music.youtube.com/watch?v=OjpX8ILe2N4&autoplay=1'},
+  {title:'ไม่รักดี', artist:'Paper Jam', bpm:125, lang:'ไทย', url:'https://music.youtube.com/watch?v=GuA1udlWTxs&autoplay=1'},
+  {title:'ปรากฏการณ์', artist:'Bodyslam', bpm:125, lang:'ไทย', url:'https://music.youtube.com/watch?v=LKnpFj0NLAs&autoplay=1'},
+  {title:'ผ้าเช็ดหน้า', artist:'Triumphs Kingdom', bpm:125, lang:'ไทย', url:'https://music.youtube.com/watch?v=Zk1L-hA5q4U&autoplay=1'},
+  {title:'จีบได้แฟนไม่รัก', artist:'หวาย', bpm:125, lang:'ไทย', url:'https://music.youtube.com/watch?v=AuMxfhH_kn0&autoplay=1'},
+  {title:'Blue Bird', artist:'Ikimonogakari', bpm:125, lang:'ญี่ปุ่น', url:'https://music.youtube.com/watch?v=udNgJUiBCRg&autoplay=1'},
+  {title:'爱你 (Love)', artist:'Cyndi Wang', bpm:125, lang:'จีน', url:'https://music.youtube.com/watch?v=Ir52xu5Fxsc&autoplay=1'},
+  {title:'Timber', artist:'Pitbull ft. Ke$ha', bpm:126, lang:'สากล', url:'https://music.youtube.com/watch?v=GcYF1xnmZTI&autoplay=1'},
+  {title:'Waiting For Love', artist:'Avicii', bpm:128, lang:'สากล', url:'https://music.youtube.com/watch?v=iR1sAex__VA&autoplay=1'},
+  {title:'Titanium', artist:'David Guetta ft. Sia', bpm:128, lang:'สากล', url:'https://music.youtube.com/watch?v=LRPGqNeav_M&autoplay=1'},
+  {title:'Feel So Close', artist:'Calvin Harris', bpm:128, lang:'สากล', url:'https://music.youtube.com/watch?v=Nh_bdvA8cVM&autoplay=1'},
+  {title:'Closer', artist:'The Chainsmokers', bpm:128, lang:'สากล', url:'https://music.youtube.com/watch?v=r7zTKRonHXM&autoplay=1'},
+  {title:'We Found Love', artist:'Rihanna', bpm:128, lang:'สากล', url:'https://music.youtube.com/watch?v=n6N1_sxlBU8&autoplay=1'},
+  {title:'Bang Bang Bang', artist:'BIGBANG', bpm:128, lang:'เกาหลี', url:'https://music.youtube.com/watch?v=1bD_2ITkGwU&autoplay=1'},
+  {title:'Gee', artist:'Girls\' Generation', bpm:129, lang:'เกาหลี', url:'https://music.youtube.com/watch?v=qizghQs4K6E&autoplay=1'},
+  {title:'Party', artist:'Girls\' Generation', bpm:130, lang:'เกาหลี', url:'https://music.youtube.com/watch?v=FByscJG_xVU&autoplay=1'},
+  {title:'Only Girl (In the World)', artist:'Rihanna', bpm:130, lang:'สากล', url:'https://music.youtube.com/watch?v=JhCA0y_ya6w&autoplay=1'},
+  {title:'แสงสุดท้าย', artist:'Bodyslam', bpm:130, lang:'ไทย', url:'https://music.youtube.com/watch?v=SZ6p1Pe-2do&autoplay=1'},
+  {title:'รักเธอเสมอ', artist:'อัสนี-วสันต์', bpm:130, lang:'ไทย', url:'https://music.youtube.com/watch?v=sST9d1fKj2c&autoplay=1'},
+  {title:'วัดใจ', artist:'Silly Fools', bpm:130, lang:'ไทย', url:'https://music.youtube.com/watch?v=3antIsUc6PM&autoplay=1'},
+  {title:'จังหวะหัวใจ', artist:'บี้ สุกฤษฎิ์', bpm:130, lang:'ไทย', url:'https://music.youtube.com/watch?v=A2IymS5cp4w&autoplay=1'},
+  {title:'Shake It Off', artist:'Taylor Swift', bpm:131, lang:'สากล', url:'https://music.youtube.com/watch?v=sWMk8dwljFU&autoplay=1'},
+  {title:'Moves Like Jagger', artist:'Maroon 5', bpm:132, lang:'สากล', url:'https://music.youtube.com/watch?v=lGOF_Zh0t58&autoplay=1'},
+  {title:'Gangnam Style', artist:'PSY', bpm:132, lang:'เกาหลี', url:'https://music.youtube.com/watch?v=4AgDYTuZWOw&autoplay=1'},
+  {title:'Bubble Pop!', artist:'HyunA', bpm:132, lang:'เกาหลี', url:'https://music.youtube.com/watch?v=bX8t_fTzSLI&autoplay=1'},
+  {title:'The Boys', artist:'Girls\' Generation', bpm:132, lang:'เกาหลี', url:'https://music.youtube.com/watch?v=gzWo1I4Scow&autoplay=1'},
+  {title:'ซมซาน', artist:'Loser', bpm:132, lang:'ไทย', url:'https://music.youtube.com/watch?v=KGe1iJf_Nmk&autoplay=1'},
+  {title:'เช้าไม่กลัว', artist:'แหลม มอริสัน', bpm:132, lang:'ไทย', url:'https://music.youtube.com/watch?v=Z1vuB8Z59bI&autoplay=1'},
+  {title:'Happy', artist:'Pharrell Williams', bpm:133, lang:'สากล', url:'https://music.youtube.com/watch?v=dJqxQzxLbHM&autoplay=1'},
+  {title:'Call Me Maybe', artist:'Carly Rae Jepsen', bpm:134, lang:'สากล', url:'https://music.youtube.com/watch?v=k6jscLH3p2g&autoplay=1'},
+  {title:'What Makes You Beautiful', artist:'One Direction', bpm:135, lang:'สากล', url:'https://music.youtube.com/watch?v=d57qSDCxVA4&autoplay=1'},
+  {title:'Uptown Funk', artist:'Mark Ronson ft. Bruno Mars', bpm:136, lang:'สากล', url:'https://music.youtube.com/watch?v=tYvFa2ARD24&autoplay=1'},
+  {title:'Can\'t Stop The Feeling!', artist:'Justin Timberlake', bpm:136, lang:'สากล', url:'https://music.youtube.com/watch?v=6p3E7OMw52g&autoplay=1'},
+  {title:'I Gotta Feeling', artist:'Black Eyed Peas', bpm:138, lang:'สากล', url:'https://music.youtube.com/watch?v=Wnn6M1nNiKQ&autoplay=1'},
+  {title:'Fire', artist:'BTS', bpm:140, lang:'เกาหลี', url:'https://music.youtube.com/watch?v=ZbWo60LyvXc&autoplay=1'},
+  {title:'Mr. Saxobeat', artist:'Alexandra Stan', bpm:140, lang:'สากล', url:'https://music.youtube.com/watch?v=uYN0VbbQTP8&autoplay=1'},
+  {title:'Don\'t Stop Me Now', artist:'Queen', bpm:141, lang:'สากล', url:'https://music.youtube.com/watch?v=CczcMarUoVk&autoplay=1'},
+  {title:'Sk8er Boi', artist:'Avril Lavigne', bpm:142, lang:'สากล', url:'https://music.youtube.com/watch?v=UYocLBXr7hQ&autoplay=1'},
+  {title:'One Way Ticket', artist:'Eruption', bpm:142, lang:'สากล', url:'https://music.youtube.com/watch?v=GMtbXGdVPCs&autoplay=1'},
+  {title:'Shut Up and Dance', artist:'Walk The Moon', bpm:145, lang:'สากล', url:'https://music.youtube.com/watch?v=GGsuLVlLObc&autoplay=1'},
+  {title:'KFC', artist:'Slot Machine', bpm:145, lang:'ไทย', url:'https://music.youtube.com/watch?v=Vfv3tMfzv08&autoplay=1'},
+  {title:'Butter-Fly', artist:'Koji Wada', bpm:145, lang:'ญี่ปุ่น', url:'https://music.youtube.com/watch?v=0SMfWmEf8Wo&autoplay=1'},
+  {title:'紅蓮の弓矢 (Guren no Yumiya)', artist:'Linked Horizon', bpm:146, lang:'ญี่ปุ่น', url:'https://music.youtube.com/watch?v=2B6nj38AdD0&autoplay=1'},
+  {title:'เพลงนี้เกี่ยวกับความรัก', artist:'วัชราวลี', bpm:148, lang:'ไทย', url:'https://music.youtube.com/watch?v=En80y9rYEag&autoplay=1'},
+  {title:'Start Over', artist:'Gaho', bpm:150, lang:'เกาหลี', url:'https://music.youtube.com/watch?v=XbaSYBK5Nc0&autoplay=1'},
+  {title:'It\'s My Life', artist:'Bon Jovi', bpm:150, lang:'สากล', url:'https://music.youtube.com/watch?v=bY3vXr7fm8k&autoplay=1'},
+  {title:'I Need A Hero', artist:'Bonnie Tyler', bpm:150, lang:'สากล', url:'https://music.youtube.com/watch?v=6kL0OqgGyQg&autoplay=1'},
+  {title:'เราและนาย', artist:'โลโซ', bpm:150, lang:'ไทย', url:'https://music.youtube.com/watch?v=uf_ej3k0qsI&autoplay=1'},
+  {title:'คุกกี้เสี่ยงทาย', artist:'BNK48', bpm:155, lang:'ไทย', url:'https://music.youtube.com/watch?v=IhQycbxutR0&autoplay=1'},
+  {title:'Heavy Rotation', artist:'AKB48', bpm:155, lang:'ญี่ปุ่น', url:'https://music.youtube.com/watch?v=hxLXdCvLHfs&autoplay=1'},
+  {title:'PonPonPon', artist:'Kyary Pamyu Pamyu', bpm:160, lang:'ญี่ปุ่น', url:'https://music.youtube.com/watch?v=QGEeqhGkdSI&autoplay=1'},
+  {title:'Mr. Brightside', artist:'The Killers', bpm:160, lang:'สากล', url:'https://music.youtube.com/watch?v=m2zUrruKjDQ&autoplay=1'},
+  {title:'Pump It', artist:'Black Eyed Peas', bpm:160, lang:'สากล', url:'https://music.youtube.com/watch?v=d77gTBvX0K8&autoplay=1'},
+{title:'วอน', artist:'The Peachband', bpm:165, lang:'ไทย', url:'https://music.youtube.com/watch?v=pi7ytjp3jK4&autoplay=1'},
+  {title:'Through the Fire and Flames', artist:'DragonForce', bpm:200, lang:'สากล', url:'https://music.youtube.com/watch?v=XkFz_hi2tWY&autoplay=1'},
+  {title:'Espresso', artist:'Sabrina Carpenter', bpm:104, lang:'สากล', url:'https://music.youtube.com/watch?v=kIft-LUHHVA&autoplay=1'},
+  {title:'Birds of a Feather', artist:'Billie Eilish', bpm:105, lang:'สากล', url:'https://music.youtube.com/watch?v=WKZO-CWeOVA&autoplay=1'},
+  {title:'Flowers', artist:'Miley Cyrus', bpm:118, lang:'สากล', url:'https://music.youtube.com/watch?v=BkSSOGNeWTM&autoplay=1'},
+  {title:'As It Was', artist:'Harry Styles', bpm:174, lang:'สากล', url:'https://music.youtube.com/watch?v=nujn6wbr-e8&autoplay=1'},
+  {title:'Cruel Summer', artist:'Taylor Swift', bpm:170, lang:'สากล', url:'https://music.youtube.com/watch?v=aC9HkZW2hZk&autoplay=1'},
+  {title:'Die With A Smile', artist:'Lady Gaga & Bruno Mars', bpm:83, lang:'สากล', url:'https://music.youtube.com/watch?v=DlFXDl_ROAM&autoplay=1'},
+  {title:'Good Luck, Babe!', artist:'Chappell Roan', bpm:116, lang:'สากล', url:'https://music.youtube.com/watch?v=VZ-oGLluGAc&autoplay=1'},
+  {title:'Too Sweet', artist:'Hozier', bpm:115, lang:'สากล', url:'https://music.youtube.com/watch?v=IN-PeAZDi7g&autoplay=1'},
+  {title:'Beautiful Things', artist:'Benson Boone', bpm:115, lang:'สากล', url:'https://music.youtube.com/watch?v=eLhSxOAaWmg&autoplay=1'},
+  {title:'Lose Control', artist:'Teddy Swims', bpm:83, lang:'สากล', url:'https://music.youtube.com/watch?v=AeedWEyMYYo&autoplay=1'},
+  {title:'Water', artist:'Tyla', bpm:117, lang:'สากล', url:'https://music.youtube.com/watch?v=xynO0CdiE6Q&autoplay=1'},
+  {title:'Seven', artist:'Jung Kook ft. Latto', bpm:125, lang:'สากล', url:'https://music.youtube.com/watch?v=5McUFZz2s-w&autoplay=1'},
+  {title:'Paint The Town Red', artist:'Doja Cat', bpm:100, lang:'สากล', url:'https://music.youtube.com/watch?v=TfOsGnWy8qA&autoplay=1'},
+  {title:'Greedy', artist:'Tate McRae', bpm:111, lang:'สากล', url:'https://music.youtube.com/watch?v=_QtN6qocpKU&autoplay=1'},
+  {title:'Vampire', artist:'Olivia Rodrigo', bpm:138, lang:'สากล', url:'https://music.youtube.com/watch?v=aHmg0jsmNhg&autoplay=1'},
+  {title:'Starboy', artist:'The Weeknd', bpm:186, lang:'สากล', url:'https://music.youtube.com/watch?v=3_g2un5M350&autoplay=1'},
+  {title:'Blinding Lights', artist:'The Weeknd', bpm:171, lang:'สากล', url:'https://music.youtube.com/watch?v=J7p4bzqLvCw&autoplay=1'},
+  {title:'Dance Monkey', artist:'Tones And I', bpm:98, lang:'สากล', url:'https://music.youtube.com/watch?v=Hx4nWW9z0ig&autoplay=1'},
+  {title:'Bad Guy', artist:'Billie Eilish', bpm:135, lang:'สากล', url:'https://music.youtube.com/watch?v=ZD6rXLXZOEI&autoplay=1'},
+  {title:'Levitating', artist:'Dua Lipa', bpm:103, lang:'สากล', url:'https://music.youtube.com/watch?v=OsfAnsMY21M&autoplay=1'},
+  {title:'APT.', artist:'ROSÉ & Bruno Mars', bpm:95, lang:'จีน', url:'https://music.youtube.com/watch?v=DiTd771WumE&autoplay=1'},
+  {title:'奢香夫人', artist:'Phoenix Legend', bpm:110, lang:'จีน', url:'https://music.youtube.com/watch?v=ziGpK5qeUgk&autoplay=1'},
+  {title:'想见你想见你想见你', artist:'831', bpm:80, lang:'จีน', url:'https://music.youtube.com/watch?v=Zh7gmg8VjFc&autoplay=1'},
+  {title:'孤勇者', artist:'Eason Chan', bpm:78, lang:'จีน', url:'https://music.youtube.com/watch?v=E-MBcgOPHJg&autoplay=1'},
+  {title:'告白气球', artist:'Jay Chou', bpm:92, lang:'จีน', url:'https://music.youtube.com/watch?v=cSqlwNjq77c&autoplay=1'},
+  {title:'七里香', artist:'Jay Chou', bpm:88, lang:'จีน', url:'https://music.youtube.com/watch?v=U8E3j6y__BA&autoplay=1'},
+  {title:'体面', artist:'Kelly Yu', bpm:85, lang:'จีน', url:'https://music.youtube.com/watch?v=YaVN4MUhYo8&autoplay=1'},
+  {title:'小幸运', artist:'Hebe Tien', bpm:112, lang:'จีน', url:'https://music.youtube.com/watch?v=YD9r_tTtlaA&autoplay=1'},
+  {title:'一笑倾城', artist:'Silence Wang', bpm:105, lang:'จีน', url:'https://music.youtube.com/watch?v=BYP8D4Lcqok&autoplay=1'},
+  {title:'晴天', artist:'Jay Chou', bpm:75, lang:'จีน', url:'https://music.youtube.com/watch?v=SJKoWAd5ySo&autoplay=1'},
+  {title:'Magnetic', artist:'ILLIT', bpm:131, lang:'เกาหลี', url:'https://music.youtube.com/watch?v=HBqH4uJS0PU&autoplay=1'},
+  {title:'Supernova', artist:'aespa', bpm:130, lang:'เกาหลี', url:'https://music.youtube.com/watch?v=G8YNFjruzPk&autoplay=1'},
+  {title:'How Sweet', artist:'NewJeans', bpm:116, lang:'เกาหลี', url:'https://music.youtube.com/watch?v=vrM2mrI83uk&autoplay=1'},
+  {title:'SPOT!', artist:'ZICO ft. JENNIE', bpm:115, lang:'เกาหลี', url:'https://music.youtube.com/watch?v=33hE0Z0iNys&autoplay=1'},
+  {title:'Bubble Gum', artist:'NewJeans', bpm:110, lang:'เกาหลี', url:'https://music.youtube.com/watch?v=GV_HP7yoIyc&autoplay=1'},
+  {title:'Love 119', artist:'RIIZE', bpm:118, lang:'เกาหลี', url:'https://music.youtube.com/watch?v=XI4r_lw9gPk&autoplay=1'},
+  {title:'Drama', artist:'aespa', bpm:120, lang:'เกาหลี', url:'https://music.youtube.com/watch?v=S3Z6N7U7f6I&autoplay=1'},
+  {title:'Perfect Night', artist:'LE SSERAFIM', bpm:145, lang:'เกาหลี', url:'https://music.youtube.com/watch?v=Gqfq_8jPw8Q&autoplay=1'},
+  {title:'I AM', artist:'IVE', bpm:130, lang:'เกาหลี', url:'https://music.youtube.com/watch?v=a0LmdjshiAQ&autoplay=1'},
+  {title:'OMG', artist:'NewJeans', bpm:127, lang:'เกาหลี', url:'https://music.youtube.com/watch?v=2Kff0U8w-aU&autoplay=1'},
+  {title:'Ditto', artist:'NewJeans', bpm:134, lang:'เกาหลี', url:'https://music.youtube.com/watch?v=V6TEcoNUmc8&autoplay=1'},
+  {title:'Pink Venom', artist:'BLACKPINK', bpm:90, lang:'เกาหลี', url:'https://music.youtube.com/watch?v=4N15045PHEA&autoplay=1'},
+  {title:'Dynamite', artist:'BTS', bpm:110, lang:'เกาหลี', url:'https://music.youtube.com/watch?v=HaEYUJ2aRHs&autoplay=1'},
+  {title:'Butter', artist:'BTS', bpm:110, lang:'เกาหลี', url:'https://music.youtube.com/watch?v=NNCBq0JHXsU&autoplay=1'},
+  {title:'Love Scenario', artist:'iKON', bpm:89, lang:'เกาหลี', url:'https://music.youtube.com/watch?v=OmEPFmyKO74&autoplay=1'},
+  {title:'Gangnam Style', artist:'PSY', bpm:132, lang:'เกาหลี', url:'https://music.youtube.com/watch?v=4AgDYTuZWOw&autoplay=1'},
+  {title:'Fancy', artist:'TWICE', bpm:152, lang:'เกาหลี', url:'https://music.youtube.com/watch?v=j4OrZV_GAsI&autoplay=1'},
+  {title:'Shut Down', artist:'BLACKPINK', bpm:110, lang:'เกาหลี', url:'https://music.youtube.com/watch?v=950BdJKBhGo&autoplay=1'},
+  {title:'Hype Boy', artist:'NewJeans', bpm:100, lang:'เกาหลี', url:'https://music.youtube.com/watch?v=ghrlZIMDzbM&autoplay=1'},
+  {title:'Attention', artist:'NewJeans', bpm:105, lang:'เกาหลี', url:'https://music.youtube.com/watch?v=kdOS94IjzzE&autoplay=1'},
+  {title:'Bling-Bang-Bang-Born', artist:'Creepy Nuts', bpm:136, lang:'ญี่ปุ่น', url:'https://music.youtube.com/watch?v=6gMBmZ28Xg4&autoplay=1'},
+  {title:'アイドル (Idol)', artist:'YOASOBI', bpm:166, lang:'ญี่ปุ่น', url:'https://music.youtube.com/watch?v=m9SMT5ipbxk&autoplay=1'},
+  {title:'Kaikai Kitan', artist:'Eve', bpm:130, lang:'ญี่ปุ่น', url:'https://music.youtube.com/watch?v=isY3rtuSsK8&autoplay=1'},
+  {title:'Dry Flower', artist:'Yuuri', bpm:78, lang:'ญี่ปุ่น', url:'https://music.youtube.com/watch?v=vwstRC5Jl9w&autoplay=1'},
+  {title:'Neko', artist:'DISH//', bpm:72, lang:'ญี่ปุ่น', url:'https://music.youtube.com/watch?v=l1ky3XPBdBE&autoplay=1'},
+  {title:'Lemon', artist:'Kenshi Yonezu', bpm:87, lang:'ญี่ปุ่น', url:'https://music.youtube.com/watch?v=3NNhrqHZqlI&autoplay=1'},
+  {title:'KICK BACK', artist:'Kenshi Yonezu', bpm:120, lang:'ญี่ปุ่น', url:'https://music.youtube.com/watch?v=NMA_isZYsYQ&autoplay=1'},
+  {title:'Pretender', artist:'Official HIGE DANdism', bpm:85, lang:'ญี่ปุ่น', url:'https://music.youtube.com/watch?v=37W7Y2RRyiM&autoplay=1'},
+  {title:'Marigold', artist:'Aimyon', bpm:78, lang:'ญี่ปุ่น', url:'https://music.youtube.com/watch?v=UbxtCV8nXnA&autoplay=1'},
+  {title:'Sparkle', artist:'RADWIMPS', bpm:85, lang:'ญี่ปุ่น', url:'https://music.youtube.com/watch?v=-J9FuvPmMoI&autoplay=1'},
+  {title:'大展鴻圖 (Blueprint Supreme)', artist:'攬佬SKAI ISYOURGOD และ AR劉夫陽', bpm:176, lang:'จีน', url:'https://music.youtube.com/watch?v=yWT-UopFlAs&autoplay=1'},
+  {title:'喵喵 (Meow Meow)', artist:'小潘潘', bpm:120, lang:'จีน', url:'https://music.youtube.com/watch?v=8j-6PcuWiZI&autoplay=1'},
 ];
 
 const FLAGS = {ไทย:'ᴛʜ',สากล:'ᴇɴ',ญี่ปุ่น:'ᴊᴘ',เกาหลี:'ᴋʀ',จีน:'ᴄɴ'};
@@ -488,8 +531,12 @@ function getFiltered() {
 
 function rowHTML(s) {
   const {color,bg} = getBpmStyle(s.bpm);
-  const url = 'https://music.youtube.com/search?q=' + encodeURIComponent(s.title+' '+s.artist);
-  return `<a href="${url}" target="_blank" class="song-row">
+  
+  // ใช้ onclick เพื่อเปิดหน้าต่างใหม่ วิธีนี้เบราว์เซอร์จะมองว่าเป็นการ "กระทำจากผู้ใช้"
+  // และยอมให้เล่นเสียง/วิดีโอได้บ่อยกว่าการใช้ลิงก์ <a> ปกติครับ
+  const url = s.url ? s.url : 'https://music.youtube.com/search?q=' + encodeURIComponent(s.title+' '+s.artist) + '&autoplay=1';
+  
+  return `<div onclick="window.open('${url}', '_blank')" class="song-row" style="cursor:pointer;">
     <div class="bpm-badge" style="background:${bg}">
       <span class="bpm-num" style="color:${color}">${s.bpm}</span>
       <span class="bpm-label" style="color:${color}">BPM</span>
@@ -500,8 +547,9 @@ function rowHTML(s) {
     </div>
     <span class="lang-flag">${FLAGS[s.lang]||''}</span>
     <div class="play-btn"><svg width="10" height="12" viewBox="0 0 10 12" fill="#00d4ff"><path d="M0 0L10 6L0 12V0Z"/></svg></div>
-  </a>`;
+  </div>`;
 }
+
 
 function render() {
   const f = getFiltered();
@@ -518,6 +566,7 @@ document.querySelectorAll('.zone-chip').forEach(btn => {
     document.querySelectorAll('.zone-chip').forEach(b => {
       b.classList.remove('active'); b.style.background=''; b.style.borderColor='';
     });
+
     if (wasActive) { activeMin=null; activeMax=null; }
     else {
       activeMin=min; activeMax=max;
@@ -563,9 +612,11 @@ document.getElementById('sBpm').addEventListener('input', () => {
   });
   render();
 });
+
 document.getElementById('sLang').addEventListener('change', render);
 
 render();
 </script>
 </body>
-</html>
+</html> 
+
